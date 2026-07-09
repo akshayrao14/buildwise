@@ -7,9 +7,23 @@ Maintainer note: this file must be hand-written and hand-maintained by the CTO �
 do not let an agent regenerate it wholesale. Keep it short; every line competes
 for the agent's attention on every task.
 
-Cross-tool bridge: add a one-line `CLAUDE.md` and `GEMINI.md` in this repo root
-pointing here (e.g. `See AGENTS.md for project context.`), or symlink them,
-so every agent reads the same source of truth regardless of tool.
+Cross-tool bridge: Claude Code reads `CLAUDE.md`, not `AGENTS.md` — there is
+no automatic fallback, confirmed by both official docs and direct testing.
+A prose sentence in `CLAUDE.md` saying "see AGENTS.md" is not reliable: it's
+a suggestion the agent may or may not act on, not a guaranteed load.
+Use a **symlink** instead — `ln -s AGENTS.md CLAUDE.md` and
+`ln -s AGENTS.md GEMINI.md` — so whatever path a given tool reads, the
+content returned *is* this file. No duplication, no staleness risk, no
+dependence on any tool's import syntax.
+
+Other tools:
+- **OpenAI Codex** reads `AGENTS.md` natively — it's the convention Codex
+  originated, so no bridge file is needed for it at all.
+- **GitHub Copilot** reads `.github/copilot-instructions.md` instead (plus,
+  optionally, path-scoped `.github/instructions/*.instructions.md` files
+  with glob frontmatter for rules that should only apply to certain paths).
+  Same symlink fix applies, adjusted for the extra directory depth:
+  `mkdir -p .github && ln -s ../AGENTS.md .github/copilot-instructions.md`
 
 ---
 
@@ -80,10 +94,15 @@ ships freely or is covered by a mechanically enforced rule above.
   or a subagent, since it never touches code an agent writes. A deliberate,
   accepted gap — see governance-decisions.md.
 
-## What Happens If You Touch a Red Zone Item
+## What Happens If You Touch a Red Zone Item (v1)
 
 Trigger event = touching one of the three Red Zone categories above.
-Process: self-declare in the PR template → automated scan (GitHub Action) →
-ephemeral adversarial-review subagent pre-check → rotating senior-engineer
-sign-off in Slack (~15–30 min). Subagent invocation mechanism still open —
-see governance-decisions.md open items.
+v1 process, deliberately kept simple: self-declare in the PR template →
+automated scan (GitHub Action, secrets/SAST only) → **required approval
+from the rotating senior engineer before merge (branch protection)**.
+
+No adversarial-review subagent in v1 — deferred to v2 once there's real
+data on reviewer workload to justify it. Important for whoever builds v2:
+the merge gate must stay **human approval**, not an automated verdict —
+a subagent's "pass" should feed the human reviewer, never substitute for
+their sign-off. See governance-decisions.md §9 item 2.

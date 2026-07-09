@@ -64,22 +64,24 @@ Two examples surfaced (frontend fetching directly from the DB; Redis/caching add
 
 ---
 
-## 5. The Funnel (5 stages, not 2)
+## 5. The Funnel — v1 simplified to 4 stages (subagent deferred to v2)
 
-Corrected from an earlier compression to "steering file + manual review" — it's actually:
+Corrected from an earlier compression to "steering file + manual review," then
+simplified again once the subagent's cost/benefit was weighed against "keep
+it simple in the first iteration" (see §8):
 
 1. **Steering file** (soft, prompted) — `AGENTS.md`: triage guidance + anti-pattern defaults + current-stack awareness
 2. **Pre-declared Red Zone category list** (CTO-owned) — **FINALIZED**, see §8
-3. **Trigger events** that fire the gate — **RESOLVED as identical to the Red Zone list** (touching one of the three categories in §8 *is* the trigger); "who/what checks them" — still open for the two categories that need judgment (invocation mechanism), moot for the mechanically-enforced ones
+3. **Trigger events** that fire the gate — **RESOLVED as identical to the Red Zone list** (touching one of the three categories in §8 *is* the trigger)
 4. **Automated deterministic checks** — secret scanning + SAST, via **GitHub Action** (preferred over a local pre-commit hook alone, since a hook can be silently skipped and an Action can't)
-5. **Ephemeral adversarial-review subagent** — LLM-based pre-check distinct from #4 (catches architecture-shape judgment calls like the two anti-pattern examples, which signature-based scanners can't). Invocation mechanism — **PENDING**
-6. **Rotating human sign-off** (lightweight Slack) — confirmed sufficient, no dedicated role needed
+5. ~~Ephemeral adversarial-review subagent~~ — **DEFERRED TO v2**, see §8. v1 ships without it: no automated pre-filtering of Red Zone PRs beyond the scanner in #4.
+6. **Rotating human sign-off** (lightweight Slack) — for v1, this is now the **sole** gate on the 3 Red Zone categories, not one layer among several. Required-reviewer branch protection, not an automated verdict, is what authorizes merge — no automated "pass" exists in v1 that could be mistaken for approval, which sidesteps the merge-authorization gap entirely rather than needing it explicitly fixed.
 
 ---
 
 ## 6. Template Repo Decisions
 
-- **`AGENTS.md`** at repo root is the canonical, cross-tool steering file — the emerging industry standard (read natively by 28+ coding tools as of mid-2026: Codex, Gemini CLI, Cursor, Copilot, and others). Claude Code's native support status is inconsistent across recent sources — some report native support added, others still describe a `CLAUDE.md`-bridge requirement. **Use the bridge regardless** (a one-line `CLAUDE.md` / `GEMINI.md` pointing to `AGENTS.md`, or a symlink) — costs nothing, works either way.
+- **`AGENTS.md`** at repo root is the canonical, cross-tool steering file. **Confirmed by direct testing (not just docs) that Claude Code does not auto-load it** — Claude Code only auto-reads `CLAUDE.md`, with no automatic fallback to `AGENTS.md`. Fix: symlink `CLAUDE.md` and `GEMINI.md` to `AGENTS.md` (`ln -s AGENTS.md CLAUDE.md`), not a prose pointer sentence — a prose "see AGENTS.md" line is a suggestion the agent may or may not act on, not a guaranteed load, which is exactly what failed on first real-world use.
 - **Write it by hand.** Research across 138 repositories found developer-written `AGENTS.md` files cut agent-introduced bugs 35–55%; LLM-generated instruction files made outcomes worse. The CTO should author this file directly.
 - **Markdown, not HTML**, for all agent-consumed meta-artifacts. The reasoning "agents will review these" argues *for* markdown, not against it — the whole point of the `AGENTS.md` convention is that the consumer is a model trained on markdown; HTML adds token overhead with no parsing benefit. GitHub/GitLab already renders markdown as formatted HTML for any human who needs a nicer view, at no extra cost.
 - The template repo also houses:
@@ -164,7 +166,10 @@ trigger *is* "this touches one of these three things."
 ## 9. Open Items Queue
 
 1. ~~Trigger event list~~ — **RESOLVED**, see §8 (identical to the Red Zone list)
-2. Adversarial-review subagent invocation mechanism — who/what triggers it, and when (still open)
+2. ~~Adversarial-review subagent invocation mechanism~~ — **DEFERRED TO v2, RESOLVED FOR v1** (v1 ships without a subagent — see §5). Decided along the way, and still valid whenever v2 picks this back up:
+   - **Reviewing tool** (whenever built): one fixed tool for all reviews, regardless of which tool built the PR. Which specific tool — TBD.
+   - **Failure handling** (whenever built): fail closed — errors/timeouts/unparseable output block the PR rather than passing it through.
+   - **The merge-authorization invariant this surfaced applies regardless of v1/v2**, and needs writing into `AGENTS.md` now, not later: the required merge check on Red Zone PRs is human approval, never an automated verdict standing in for it. For v1 this is moot by construction (no automated verdict exists yet) — but must not be forgotten when the v2 subagent is added, or the same mistake recurs.
 3. ~~Red Zone category list~~ — **RESOLVED**, see §8
 4. Feedback loop to keep `AGENTS.md` current as production evolves — explicitly parked, staleness avoidance is "a problem for later"
 5. Citizen Dev Phase 2+, and full phase definitions for Reviewing Engineer and CTO — still open; Red Zone finalization unblocks this
