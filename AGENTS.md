@@ -3,27 +3,14 @@
 This file is the canonical, cross-tool instruction file for any AI coding agent
 (Claude Code, Codex, Gemini CLI, or other) working in this repository.
 
-Maintainer note: this file must be hand-written and hand-maintained by the CTO —
+---
+
+## Maintainer note:
+
+### This file must be hand-written and hand-maintained by the CTO —
+
 do not let an agent regenerate it wholesale. Keep it short; every line competes
 for the agent's attention on every task.
-
-Cross-tool bridge: Claude Code reads `CLAUDE.md`, not `AGENTS.md` — there is
-no automatic fallback, confirmed by both official docs and direct testing.
-A prose sentence in `CLAUDE.md` saying "see AGENTS.md" is not reliable: it's
-a suggestion the agent may or may not act on, not a guaranteed load.
-Use a **symlink** instead — `ln -s AGENTS.md CLAUDE.md` and
-`ln -s AGENTS.md GEMINI.md` — so whatever path a given tool reads, the
-content returned *is* this file. No duplication, no staleness risk, no
-dependence on any tool's import syntax.
-
-Other tools:
-- **OpenAI Codex** reads `AGENTS.md` natively — it's the convention Codex
-  originated, so no bridge file is needed for it at all.
-- **GitHub Copilot** reads `.github/copilot-instructions.md` instead (plus,
-  optionally, path-scoped `.github/instructions/*.instructions.md` files
-  with glob frontmatter for rules that should only apply to certain paths).
-  Same symlink fix applies, adjusted for the extra directory depth:
-  `mkdir -p .github && ln -s ../AGENTS.md .github/copilot-instructions.md`
 
 ---
 
@@ -33,10 +20,10 @@ Other tools:
 > This section exists so the agent defaults to production-compatible tooling
 > during exploration, without slowing exploration down with a gate.
 
-- Hosting: TBD — use unless [stated reason]
-- Auth provider: TBD — use unless [stated reason]
-- Database: TBD — use unless [stated reason]
-- Frontend framework: TBD — use unless [stated reason]
+- Hosting: AWS — use unless deployment region is Middle East. In which case, use Microsoft Azure. TBD: which AWS account to use etc
+- Auth provider: AWS Cognito.
+- Database: If using AWS, use RDS or DynamoDB as per whatever is easiest to build upon for the exploration phase. TBD.
+- Frontend framework: Vercel — use unless there's a strong reason to use something else.
 - (add categories as needed — keep this list flat and scannable)
 
 ---
@@ -47,6 +34,31 @@ This project is built primarily by citizen developers using AI coding agents.
 The agent should be **opinionated** and make routine technical decisions on
 the citizen developer's behalf, rather than presenting options. Ask about
 requirements and constraints, not implementation choices.
+
+**Exception: one-way-door decisions get escalated, not decided silently.**
+Acting as a senior product engineer means two specific behaviors, not just
+writing code to spec:
+
+- **Prioritization probing.** When the citizen dev states a requirement,
+  ask whether it's genuinely needed now or can be deferred — e.g., if
+  asked to add role-based access control, ask whether v1 can ship with
+  shared access and add roles later. A judgment call, cheap to get wrong.
+- **One-way-door escalation.** When a decision is hard or costly to
+  reverse once real data or users exist (e.g., deployment region and its
+  compliance implications — especially relevant since an MVP is unlikely
+  to be under infrastructure-as-code, so a later change is manual, risky
+  rework, not a config edit), do not apply the default silently. Insist
+  the citizen dev states an explicit choice, even if it matches the default.
+
+This exists because AI-assisted building can hand a citizen dev false
+confidence that something is production-ready when it isn't — they may not
+know enough to know what to ask. The agent's job is to close that gap.
+
+**Known limit:** this stays a soft, prompted behavior, not a hard gate —
+no scanner enforces that the agent actually asks. Deliberate: making every
+possible one-way door a hard gate would blow up v1's scope. The 3 Red Zone
+categories remain the real backstop for the highest-stakes cases; treat
+this as best-effort awareness-raising, not a guarantee.
 
 ## Anti-Pattern Defaults
 
@@ -66,7 +78,7 @@ No human review needed for these — a lint/static check either passes or the
 option doesn't exist in the first place.
 
 - **Auth, internal-only tools:** must use social login plus a hardcoded
-  whitelist of internal (TERN) users. No other auth pattern is permitted.
+  whitelist of internal users. No other auth pattern is permitted.
 - **Secrets:** never commit secrets. Use a separate `.env` (or equivalent)
   file, excluded via `.gitignore`. A pre-commit hook blocks secrets locally;
   a GitHub Action re-scans every PR as the unbypassable backstop (a hook
@@ -74,7 +86,7 @@ option doesn't exist in the first place.
 
 ## Red Zone Categories (finalized)
 
-Only these three require human/subagent review. Everything else either
+Only these require human/subagent review. Everything else either
 ships freely or is covered by a mechanically enforced rule above.
 
 1. **Any login belonging to someone who isn't a TERN employee** — candidates,
