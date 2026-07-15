@@ -20,7 +20,26 @@ for the agent's attention on every task.
 > This section exists so the agent defaults to production-compatible tooling
 > during exploration, without slowing exploration down with a gate.
 
+**How to apply this section:** these are decisions, not a starting point
+for comparison. Apply the default silently unless the citizen dev has
+stated an actual constraint the default can't satisfy — do not generate
+alternatives "for completeness" or present a menu of named approaches
+to compare the default against.
+
+**Provider substitution:** if a non-default provider (e.g.: auth, hosting,
+database, frontend or any other) is a clearly better fit for a specific need —
+faster to build, simpler to set up — do not swap silently, and do not
+swap based on your own difficulty assessment alone. Get the citizen dev
+to consult the reviewing engineer once before proceeding; log the
+outcome as a journal entry (see Per-Project Journal below). Applies even
+to fully internal, non-Red-Zone projects — this is a separate trigger
+from Red Zone review, not a subset of it.
+
 - Hosting: AWS — use unless deployment region is Middle East. In which case, use Microsoft Azure. TBD: which AWS account to use etc
+- Compute: serverless/managed only (Lambda, managed DB, Vercel) — use
+  unless there's a stated need for long-running jobs or runtime control
+  serverless can't provide. Do not propose containers/VMs as an
+  alternative unless that need is stated.
 - Auth provider: AWS Cognito.
 - Database: If using AWS, use RDS or DynamoDB as per whatever is easiest to build upon for the exploration phase. TBD.
 - Frontend framework: Vercel — use unless there's a strong reason to use something else.
@@ -28,7 +47,41 @@ for the agent's attention on every task.
 
 ---
 
-## Project Stance
+## Per-Project Journal
+
+Each project with a design-spec doc (`<project-name>-design.md`) gets a
+companion, append-only journal (`<project-name>-journal.md`), same folder.
+Purpose: trace how a decision changed over time (idea A → idea B, and
+why) — not to reconstruct current state, which is the design-spec doc's
+job alone.
+
+- **Seed entry** — written when the design-spec doc is first created:
+  one entry, the initial approach and why.
+- **Append entry** — written every time the design-spec doc is edited
+  after that: what changed, and why.
+- **Provider-substitution consults** (above) also get an entry, even if
+  the design-spec doc itself doesn't change as a result — e.g.,
+  "considered Clerk over Cognito for social sign-in; reviewing engineer
+  judged Cognito's setup cost acceptable; no substitution made."
+
+Soft, prompted behavior — no check enforces that an entry was actually
+written. Acceptable here specifically because a missed entry is
+low-stakes (a slightly less complete trace), unlike a missed Red Zone
+gate. Not used by the citizen dev or the building agent day-to-day —
+its only reader is a reviewing engineer or CTO tracing history later.
+
+## TERN Systems Reference
+
+For what internal services/APIs already exist and what they do, see
+`SYSTEMS.md` — read on demand when relevant (e.g. a project needs to
+integrate with an existing system), not auto-loaded every session.
+Narrow v1 scope: what exists and what it does, not full schemas yet.
+
+This repo's public copy is a bare-minimum stub. Real content lives only
+in TERN's private fork, same filename — so this pointer line never has
+to differ between the public template and the private fork.
+
+---
 
 This project is built primarily by citizen developers using AI coding agents.
 The agent should be **opinionated** and make routine technical decisions on
@@ -59,6 +112,13 @@ no scanner enforces that the agent actually asks. Deliberate: making every
 possible one-way door a hard gate would blow up v1's scope. The 3 Red Zone
 categories remain the real backstop for the highest-stakes cases; treat
 this as best-effort awareness-raising, not a guarantee.
+
+**When presenting a decision you've already made** (per Current Production
+Stack), state the decision and its product-relevant consequence — cost,
+speed, compliance — in a sentence or two. Never a menu of named
+architecture approaches to choose between. This does not apply to genuine
+one-way-door escalations (e.g. region) — those still get raised explicitly
+and the citizen dev still makes the call.
 
 ## Anti-Pattern Defaults
 

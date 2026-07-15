@@ -177,3 +177,138 @@ trigger _is_ "this touches one of these three things."
 3. ~~Red Zone category list~~ — **RESOLVED**, see §8
 4. Feedback loop to keep `AGENTS.md` current as production evolves — explicitly parked, staleness avoidance is "a problem for later"
 5. Citizen Dev Phase 2+, and full phase definitions for Reviewing Engineer and CTO — still open; Red Zone finalization unblocks this
+
+---
+
+## 10. First Live Test — Findings (Session 3)
+
+Scenario: CTO ran a live Claude Code session, playing a citizen dev, with
+the brief "build an internal tool where recruiters can view a candidate
+list and leave notes." Scope: conversational layer only (no merge-gate
+infra exists yet). Full transcript and resulting design spec on file.
+
+**Passed:**
+- Red Zone 1 (external recruiter logins) and Red Zone 2 (candidate PII/notes)
+  both caught immediately and correctly, unprompted
+- Did *not* misapply the internal-only whitelist rule to an app with
+  external users — the subtle failure mode flagged as worth watching for
+- Deployment region escalated explicitly as a one-way door (GDPR/EU),
+  not silently defaulted — cited the exact reasoning from `AGENTS.md`
+  (MVP unlikely to be under IaC, so a later move is manual rework)
+- **Prioritization probing correctly overridden by Red Zone context**:
+  agent's own words — normally it would push to defer access-control
+  scoping for v1, but recognized that "everyone sees everyone" is a
+  data-minimization problem given external parties + GDPR PII, not a
+  deferrable nicety. Resolves the edge case flagged when this behavior
+  was first designed (prioritization deferral vs. Red Zone collision) —
+  handled correctly without being told to.
+- Silent, correct judgment call with no PM input needed: chose 404 over
+  403 for unassigned-candidate access specifically to avoid confirming a
+  record's existence (GDPR non-disclosure) — Project Stance's "decide
+  routine matters silently" working as intended, including on a genuinely
+  non-trivial security judgment call.
+
+**Failed:** "stays focused, doesn't over-ask."
+
+**Root cause, not two separate complaints:** the CTO's two complaints
+(too much technical detail shown; suggesting containers/ECS as an
+alternative) turned out to be the same bug. `AGENTS.md`'s Current
+Production Stack already specifies AWS + Vercel as the default (Approach
+A in the transcript) — but the agent generated two off-default
+alternatives (Approach B: full AWS/Amplify; Approach C: single-container
+ECS) and presented all three as options to choose between. This violates
+Project Stance's first line ("make routine technical decisions... rather
+than presenting options") directly — an already-decided default got
+treated as a live decision and re-opened for comparison. The one-way-door
+escalations (region) were not the problem; those are working as designed.
+The problem is specifically re-litigating things `AGENTS.md` already
+settled.
+
+**Fix applied to `AGENTS.md`** (three changes, scoped narrowly to avoid
+suppressing genuine one-way-door escalation):
+1. Added explicit "how to apply this section" guidance to Current
+   Production Stack: apply the default silently unless a stated
+   constraint the default can't satisfy exists; don't generate
+   alternatives "for completeness."
+2. Added a `Compute:` line: serverless/managed only by default (Lambda,
+   managed DB, Vercel); containers/VMs require a stated need (long-running
+   jobs, runtime control) before being proposed at all.
+3. Added guidance to Project Stance: when presenting an already-made
+   decision, state it and its product-relevant consequence in a sentence
+   or two — never a menu of named architecture approaches. Explicitly
+   scoped to not apply to genuine one-way-door escalations, which still
+   get raised explicitly.
+
+**Not yet re-tested** — these fixes haven't been run through a second
+live session yet to confirm the over-asking behavior is actually gone
+without also suppressing the escalation behavior that was working.
+
+---
+
+## 11. Three Mechanisms — Journal, Substitution Flags, Systems Reference
+
+**1. Per-project journal.** Separate from `governance-decisions.md` by
+design — that file strips debate and keeps only decisions + principles
+(system-level); this journal exists specifically to preserve the "how did
+idea A become idea B" trail (per-project). Not a contradiction, just two
+documents at different scopes. Resolved: own file per project
+(`<project-name>-journal.md`, append-only, next to `<project-name>-design.md`),
+not folded into the design-spec doc — reconstructing current state and
+tracing history are different jobs, and the design-spec doc already
+covers the first. Event-triggered, not narrated mid-conversation: seed
+entry on first draft, append entry on every subsequent edit to the
+design-spec doc. Soft/prompted, no enforcement — acceptable since a
+missed entry is low-stakes, unlike a missed Red Zone gate.
+
+**2. Generalized provider-substitution flag.** Started as an
+auth-specific concern (Cognito is fiddly to set up for social sign-in
+compared to alternatives) and generalized to hosting/DB/frontend/etc.
+**Rejected: pre-declaring a mandated alternate stack** (e.g. always Clerk
+for auth, fly.io for hosting, Supabase, n8n). Reasoning: this reintroduces
+the exact handoff-rewrite pain the whole system exists to prevent — the
+Current Production Stack defaults are TERN's actual production stack
+specifically so a successful prototype never needs a rewrite to graduate;
+mandating different vendors moves the mismatch from "if it scales" to
+"definitely, at handoff." It also silently undoes the review trigger
+decided the same session — a pre-approved alternate stops being a
+"substitution" at all, so there'd be nothing left to review. And it's a
+broad fix for a narrow problem, same shape of mistake as the
+Redis-for-2-users anti-pattern from earlier. **Accepted instead:** no
+pre-approved alternates; any non-default substitution (not just auth)
+triggers a one-time reviewing-engineer consult via the citizen dev,
+logged as a journal entry. Applies even to fully internal, non-Red-Zone
+projects — a separate trigger from Red Zone review, not a subset of it.
+Real risk flagged and accepted: "the agent finds the default painful to
+set up" is a soft, self-assessed trigger, same shape of risk Assumption 2
+warned about (a rule living entirely in the agent's own judgment under
+pressure to move fast) — kept anyway since the consult requirement, not
+the agent's own restraint, is what actually catches it.
+
+**3. TERN Systems Reference (`SYSTEMS.md`).** Directly answers a gap the
+first live test surfaced — the design spec had to flag "confirm the TERN
+candidate API can filter per-recruiter" as an unconfirmed assumption,
+with no source to check it against. Narrow v1 scope, deliberately: what
+internal services/APIs exist and what they do, not full schemas yet.
+Drafted by an agent reading actual configs/schemas (e.g. spun up from the
+parent directory containing TERN's other repos), then edited by the CTO
+— this is a factual-accuracy risk, not the prescriptive-behavior risk the
+hand-write-only rule for `AGENTS.md` addressed, so reading real sources
+first is what makes this trustworthy, not who edits it after. Pull on
+demand, not auto-loaded (same reasoning as `governance-decisions.md` —
+most projects never need it). Staleness explicitly punted, consistent
+with the existing open item (§9 #4) — noted as likely worse here, since
+TERN's real systems change under actual engineering, not just under this
+framework's own decisions.
+
+**Public/private split, resolved:** real content (actual TERN service
+names, schemas) stays in TERN's private fork only — this repo is meant to
+be shared publicly with the CTO's network, and a schema leak is an event
+door (per Assumption 3), not reversible once pushed. Both the public repo
+and the private fork use the identical filename (`SYSTEMS.md`), with only
+content differing (public: bare-minimum illustrative stub; private:
+real TERN systems) — so `AGENTS.md`'s pointer line never has to diverge
+between the two.
+
+No conflict with the existing Current Production Stack section: that
+section stays prescriptive ("what to default to"); `SYSTEMS.md` is
+descriptive ("what actually exists and how it works"). Different jobs.
