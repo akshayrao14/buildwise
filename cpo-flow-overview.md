@@ -11,8 +11,8 @@ PMs and other non-engineers are now shipping real, working products using AI cod
 | Role | What they do here |
 | :--- | :--- |
 | **Citizen Developer** | Builds using an AI coding agent |
-| **Reviewing Engineer** | Rotates weekly; only engages when something is flagged |
-| **CTO** | Sets the rules once (what counts as sensitive, what the agent defaults to) — not in either flow below, but accountable for both |
+| **Reviewing Engineer** | Self-fillable — the citizen dev, a technical friend, or explicitly skipped with a logged risk note; engages when something is flagged |
+| **You (setting up onewaydoor)** | Sets the rules once (what counts as sensitive, what the agent defaults to) — not in either flow below, but accountable for both |
 
 Two separate views follow: what it feels like to build, and what it feels like to review.
 
@@ -29,7 +29,7 @@ flowchart TD
     D -->|Yes - flagged automatically| F[Quick structured write-up:<br/>what it does, what data it touches]
     F --> G[Automated security scan<br/>runs in the background]
     G --> H[AI pre-check catches<br/>obvious issues first]
-    H --> I[Rotating engineer:<br/>~15-30 min review]
+    H --> I[Reviewing Engineer (self or otherwise):<br/>~15-30 min review]
     I -->|Approved| E
     I -->|Needs changes| J[Specific, actionable<br/>fix list]
     J --> C
@@ -43,8 +43,8 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A[On review rotation this week] --> B{Slack ping received?}
-    B -->|No ping - nothing flagged| C[No action needed<br/>most weeks are quiet]
+    A[Filling the Reviewing Engineer role for this project] --> B{Slack ping received?}
+    B -->|No ping - nothing flagged| C[No action needed<br/>most of the time]
     B -->|Ping - something was flagged| D[Open the write-up:<br/>what it does, what data it touches]
     D --> E[Automated scan results<br/>already attached]
     E --> F[AI pre-check notes<br/>already attached]
