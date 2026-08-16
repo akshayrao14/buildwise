@@ -1,0 +1,231 @@
+name: Onewaydoor Project Checks
+
+on:
+  pull_request:
+  push:
+    branches:
+      - working
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  node-project:
+    name: Node project checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Read onewaydoor project-check mode
+        id: mode
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          config_value() {
+            local key="$1"
+            local default="$2"
+            if [[ -f onewaydoor.config.yml ]]; then
+              local value
+              value="$(awk -F: -v key="$key" '$1 == key {print $2; exit}' onewaydoor.config.yml | sed 's/^ *//; s/ *$//' | tr -d '"')"
+              if [[ -n "$value" ]]; then
+                echo "$value"
+                return
+              fi
+            fi
+            echo "$default"
+          }
+
+          project_type="$(config_value project_type fresh-template)"
+          project_checks_mode="$(config_value project_checks_mode auto)"
+          build_check_mode="$(config_value build_check_mode advisory)"
+
+          if [[ "$project_type" == "existing-import" && "$project_checks_mode" == "auto" ]]; then
+            project_checks_mode="advisory"
+          fi
+
+          case "$project_checks_mode" in
+            auto|advisory|disabled) ;;
+            *)
+              echo "Unknown project_checks_mode '$project_checks_mode'; expected auto, advisory, or disabled." >&2
+              exit 1
+              ;;
+          esac
+
+          case "$build_check_mode" in
+            advisory|blocking) ;;
+            *)
+              echo "Unknown build_check_mode '$build_check_mode'; expected advisory or blocking." >&2
+              exit 1
+              ;;
+          esac
+
+          echo "project_type=$project_type" >> "$GITHUB_OUTPUT"
+          echo "project_checks_mode=$project_checks_mode" >> "$GITHUB_OUTPUT"
+          echo "build_check_mode=$build_check_mode" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "# Onewaydoor project-check mode"
+            echo
+            echo "- Project type: \`$project_type\`"
+            echo "- Project checks mode: \`$project_checks_mode\`"
+            echo "- Build check mode: \`$build_check_mode\` (\`build\` is advisory by default; set \`build_check_mode: blocking\` in \`onewaydoor.config.yml\` to enforce it)"
+            echo
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Skip disabled project checks
+        if: steps.mode.outputs.project_checks_mode == 'disabled'
+        shell: bash
+        run: |
+          echo "Onewaydoor generic project checks are disabled by onewaydoor.config.yml. Native repo CI should remain authoritative." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Detect Node project
+        if: steps.mode.outputs.project_checks_mode != 'disabled'
+        id: node
+        shell: bash
+        run: |
+          if [[ -f package.json ]]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "No package.json found; skipping Node project checks." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Setup Node.js
+        if: steps.mode.outputs.project_checks_mode != 'disabled' && steps.node.outputs.present == 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Install dependencies
+        if: steps.mode.outputs.project_checks_mode != 'disabled' && steps.node.outputs.present == 'true'
+        shell: bash
+        env:
+          PROJECT_CHECKS_MODE: ${{ steps.mode.outputs.project_checks_mode }}
+        run: |
+          set -euo pipefail
+
+          install_deps() {
+            if [[ -f pnpm-lock.yaml ]]; then
+              corepack enable
+              pnpm install --frozen-lockfile
+            elif [[ -f yarn.lock ]]; then
+              corepack enable
+              yarn install --immutable || yarn install --frozen-lockfile
+            elif [[ -f package-lock.json ]]; then
+              npm ci
+            else
+              npm install
+            fi
+          }
+
+          if [[ "$PROJECT_CHECKS_MODE" == "advisory" ]]; then
+            install_deps || {
+              echo "Onewaydoor dependency-install failure is advisory for this repo. Native CI should remain authoritative." >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            }
+          else
+            install_deps
+          fi
+
+      - name: Run available package scripts
+        if: steps.mode.outputs.project_checks_mode != 'disabled' && steps.node.outputs.present == 'true'
+        shell: bash
+        env:
+          PROJECT_CHECKS_MODE: ${{ steps.mode.outputs.project_checks_mode }}
+          BUILD_CHECK_MODE: ${{ steps.mode.outputs.build_check_mode }}
+        run: |
+          set -uo pipefail
+
+          if [[ -f pnpm-lock.yaml ]]; then
+            pm=pnpm
+          elif [[ -f yarn.lock ]]; then
+            pm=yarn
+          else
+            pm=npm
+          fi
+
+          has_script() {
+            node -e "const p=require('./package.json'); process.exit(p.scripts && p.scripts['$1'] ? 0 : 1)"
+          }
+
+          run_script() {
+            local script="$1"
+            if [[ "$pm" == "npm" ]]; then
+              npm run "$script"
+            else
+              "$pm" run "$script"
+            fi
+          }
+
+          declare -A blocking_for=([lint]=blocking [typecheck]=blocking [test]=blocking [build]=advisory)
+          if [[ "$PROJECT_CHECKS_MODE" == "advisory" ]]; then
+            blocking_for=([lint]=advisory [typecheck]=advisory [test]=advisory [build]=advisory)
+          elif [[ "$BUILD_CHECK_MODE" == "blocking" ]]; then
+            blocking_for[build]=blocking
+          fi
+
+          scripts_found=()
+          scripts_failed=()
+          blocking_failed=()
+
+          for script in lint typecheck test build; do
+            if ! has_script "$script"; then
+              echo "No $script script; skipping."
+              continue
+            fi
+
+            scripts_found+=("$script")
+            echo "Running $script with $pm"
+
+            if run_script "$script"; then
+              continue
+            fi
+
+            echo "::error::Onewaydoor project check failed: $script (${blocking_for[$script]})"
+            scripts_failed+=("$script")
+            if [[ "${blocking_for[$script]}" == "blocking" ]]; then
+              blocking_failed+=("$script")
+            fi
+          done
+
+          {
+            echo "## Onewaydoor project check results"
+            echo
+            if [[ ${#scripts_found[@]} -eq 0 ]]; then
+              echo "No lint/typecheck/test/build scripts found in package.json; nothing to run."
+            else
+              echo "| Script | Found | Result | Enforcement |"
+              echo "|---|---|---|---|"
+              for script in lint typecheck test build; do
+                found=no
+                for f in "${scripts_found[@]:-}"; do [[ "$f" == "$script" ]] && found=yes; done
+                if [[ "$found" == no ]]; then
+                  echo "| \`$script\` | no | - | - |"
+                  continue
+                fi
+                result=passed
+                for f in "${scripts_failed[@]:-}"; do [[ "$f" == "$script" ]] && result=failed; done
+                echo "| \`$script\` | yes | $result | ${blocking_for[$script]} |"
+              done
+            fi
+            echo
+            if [[ ${#scripts_failed[@]} -gt 0 ]]; then
+              echo "### Failures"
+              echo
+              for script in "${scripts_failed[@]}"; do
+                echo "- \`$script\` (${blocking_for[$script]}): reproduce locally with \`$pm run $script\`"
+              done
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ ${#blocking_failed[@]} -gt 0 ]]; then
+            echo "::error::Blocking onewaydoor project checks failed: ${blocking_failed[*]}"
+            exit 1
+          fi
+
+          exit 0
