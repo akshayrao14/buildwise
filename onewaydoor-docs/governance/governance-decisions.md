@@ -12,8 +12,8 @@ Status: living document. Sections marked **PENDING** are open items, not yet dec
 ## 1. Roles (confirmed)
 
 Two roles, deliberately kept minimal — team size varies, and this framework
-stays deliberately minimal regardless of team size, down to a single citizen
-dev with no one else:
+stays that way regardless of team size, down to a single citizen dev with no
+one else:
 
 - **Citizen Developer** — builds using an AI coding agent (Claude Code, Codex, Gemini CLI, or other — solution must be agent-agnostic)
 - **Reviewing Engineer** — self-fillable, not a dedicated headcount; can be the citizen dev themself, a technical friend/advisor, or explicitly skipped with an acknowledged risk logged in the project journal
@@ -94,7 +94,6 @@ it simple in the first iteration" (see §8):
 - The template repo also houses:
   - A GitHub Action running secret scan + SAST on every PR
   - A PR template with the Red Zone self-declaration checklist (supplementary signal only — not sufficient alone, since it relies on self-report)
-  - A committed prompt file for the adversarial-review subagent (so it's a real artifact, not tribal knowledge)
 
 ---
 
@@ -118,10 +117,12 @@ Started from the 5-item placeholder in §7/AGENTS.md. Stress-testing each
 category collapsed most of them into mechanical enforcement rather than
 human review — a materially different outcome than expected going in.
 
-**Auth architecture — dropped from Red Zone, mechanically enforced instead.**
-Internal-only tools must use social login plus a hardcoded whitelist of
-your own organization's users — one mandated pattern, no judgment call, so
-a lint/static check does the job. No human touchpoint needed.
+**Auth architecture — dropped from Red Zone, handled as a documented
+convention instead.** Internal-only tools should use social login plus an
+explicit whitelist of approved users — one mandated pattern, no judgment
+call in principle, but no lint/static check backs it today. Documented in
+`AGENTS.md`, not mechanically enforced; if a project needs a real check, it
+must be scoped and built explicitly rather than assumed to exist.
 
 **Secrets — confirmed as mechanically enforced (consistent with the
 original Assumption 3 conclusion).** Separate `.env` file; pre-commit hook
@@ -131,18 +132,19 @@ alone can be skipped).
 **Cross-service DB access — split into two distinct risks, resolved
 differently.**
 
-- _Code-level:_ citizen-dev services get their own isolated DB credentials
-  (not shared/master credentials), so accidental cross-service writes from
-  a citizen dev's own new service aren't structurally possible. Mechanically
-  enforced by how credentials are already issued — no new rule needed.
-- _Existing-service data access:_ the real-world version of this risk (a
-  citizen dev needing data that already lives in another service's DB) is
-  gated by network isolation (shared prod VPC; cross-service reachability
-  requires an admin-approved security-group change) plus an informal
-  "justify it first" norm — not a technical block. **Explicitly scoped out
-  of this system** — infra/admin-layer process changes were ruled out of
-  scope for this conversation. Accepted as a known, unclosed gap, not a
-  false sense of coverage.
+- _Code-level:_ Supabase provisions each project its own isolated
+  database and credentials by default (no shared org account, no shared
+  VPC to reason about) — a citizen dev's new project can't accidentally
+  write to another project's data the same way it could under a shared,
+  centrally-issued-credential model. Structural, not something a new rule
+  needs to enforce.
+- _Existing-project data access:_ the remaining real-world risk is a
+  citizen dev manually granting broader access than needed (e.g. sharing a
+  service-role key across projects, or a Supabase org-level role wider than
+  the task requires) plus an informal "justify it first" norm — not a
+  technical block. **Explicitly scoped out of this system** — infra/admin
+  process changes were ruled out of scope for this conversation. Accepted
+  as a known, unclosed gap, not a false sense of coverage.
 
 **Non-anonymized user records — kept in Red Zone, reframed as checkable
 rather than descriptive** (illustrative example: a support-ticket tool
@@ -164,10 +166,12 @@ scanner can verify.
 
 **Net result:** a 5-item placeholder collapsed to 3 categories that need
 real review (external identity, non-anonymized user records, payment
-handling), 2 that turned out to be enforceable without any human in the
-loop (auth, secrets), and 1 explicitly descoped (cross-service DB access
-via network/security-group changes). This also resolves the trigger-event
-question from §5/§9 — for the 3 Red Zone categories, the trigger _is_
+handling), 1 that turned out to be enforceable without any human in the
+loop (secrets), 1 handled as a documented convention with no mechanical
+backstop (auth), and 1 explicitly descoped (existing-project cross-service
+data access via manually over-granted credentials/roles). This also resolves
+the trigger-event question from §5/§9 — for the 3 Red Zone categories, the
+trigger _is_
 "this touches one of these three things."
 
 ---
@@ -256,10 +260,10 @@ without also suppressing the escalation behavior that was working.
 design — that file strips debate and keeps only decisions + principles
 (system-level); this journal exists specifically to preserve the "how did
 idea A become idea B" trail (per-project). Not a contradiction, just two
-documents at different scopes. Resolved: own file per project
-(`<project-name>-journal.md`, append-only, next to `<project-name>-design.md`),
-not folded into the design-spec doc — reconstructing current state and
-tracing history are different jobs, and the design-spec doc already
+documents at different scopes. Resolved: own file per project (`JOURNAL.md`,
+append-only, next to `DESIGN.md`), not folded into the design-spec doc —
+reconstructing current state and tracing history are different jobs, and
+the design-spec doc already
 covers the first. Event-triggered, not narrated mid-conversation: seed
 entry on first draft, append entry on every subsequent edit to the
 design-spec doc. Soft/prompted, no enforcement — acceptable since a
