@@ -12,7 +12,7 @@ PMs and other non-engineers are now shipping real, working products using AI cod
 | :--- | :--- |
 | **Citizen Developer** | Builds using an AI coding agent |
 | **Reviewing Engineer** | Self-fillable — the citizen dev, a technical friend, or explicitly skipped with a logged risk note; engages when something is flagged |
-| **You (setting up onewaydoor)** | Sets the rules once (what counts as sensitive, what the agent defaults to) — not in either flow below, but accountable for both |
+| **Whoever owns this project's technical decisions** | Sets the rules once (what counts as sensitive, what the agent defaults to) — not in either flow below, but accountable for both |
 
 Two separate views follow: what it feels like to build, and what it feels like to review.
 
