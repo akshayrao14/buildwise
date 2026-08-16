@@ -2,8 +2,8 @@
 
 onewaydoor is a template repo for Citizen Developers building projects with AI
 coding agents. It gives each project a safe starting structure, agent steering
-instructions, an onboarding flow, reusable GitHub checks, local pre-commit
-checks, and PR review prompts.
+instructions, an onboarding flow, self-contained GitHub Actions workflows,
+local pre-commit checks, and PR review prompts.
 
 Use this guide when creating a new onewaydoor project repo, handing it to a
 Citizen Developer, or bringing an existing project onto onewaydoor.
@@ -91,7 +91,8 @@ change the required-human-approval gate on `main`.
   `README.md`, and `TODO.md`.
 - Red Zone guidance for external login, payments, and project-specific
   domain-sensitive data.
-- Reusable GitHub Actions called by thin workflows in each project repo.
+- Self-contained GitHub Actions workflow files in each project repo — no
+  shared/reusable-workflows repo dependency.
 - A PR template with Red Zone self-declaration and deployment-impact prompts.
 - `.pre-commit-config.yaml` for local secret/key/large-file/syntax checks.
 

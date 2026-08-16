@@ -14,7 +14,7 @@ Mode is inferred from the task and repo context. It is not a persisted project
 state and should not be added as another mutable lifecycle field.
 
 - In the onewaydoor template repo, changes to `AGENTS.md`, `onewaydoor-docs/`,
-  template root files, governance docs, or workflow callers are
+  template root files, governance docs, or self-contained CI/CD workflows are
   template-maintenance mode.
 - In a generated project repo with active project context, normal product work
   is Citizen Developer project mode.
@@ -32,7 +32,8 @@ from onewaydoor, or when the startup phrase is used in a project repo.
 
 The agent should:
 
-- read `AGENTS.md`, `PROJECT-CONTEXT.md` when present, and the onboarding guide;
+- read `AGENTS.md`, `PROJECT-CONTEXT.md` when present, and the onboarding guide
+  (`onewaydoor-docs/onboarding/ONBOARDING.md`);
 - use `DESIGN.md`, `JOURNAL.md`, `README.md`, `TODO.md`, and `docs/` for
   project-specific context;
 - ask staged questions one at a time and defer technical setup until needed;
@@ -72,8 +73,8 @@ backlog, or security conventions with fresh onewaydoor defaults.
 ## 3. Template-maintenance mode
 
 Use this mode when changing this template repo itself, including `AGENTS.md`,
-`onewaydoor-docs/`, reusable workflow callers, template project files, or
-governance decisions.
+`onewaydoor-docs/`, the self-contained CI/CD workflows, template project files,
+or governance decisions.
 
 The agent should:
 

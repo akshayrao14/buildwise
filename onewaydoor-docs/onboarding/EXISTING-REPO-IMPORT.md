@@ -259,8 +259,8 @@ existing-import pointers.
     - The PR template reflects the target repo's real quality gates and
       deployment/security model while keeping onewaydoor Red Zone prompts.
     - Generic onewaydoor docs under `onewaydoor-docs/onboarding/`,
-      `onewaydoor-docs/governance/`, `onewaydoor-docs/operations/`, and
-      `onewaydoor-docs/template/` may remain generic by design.
+      `onewaydoor-docs/governance/`, and `onewaydoor-docs/template/` may
+      remain generic by design.
 
     Any remaining fresh-template placeholder in project-owned docs should be
     fixed before asking for import approval, or explicitly recorded as a small
@@ -286,10 +286,11 @@ placeholder wording, startup text, or onboarding prose, treat it as already
 superseded by the project and record that decision in the import/sync review
 note if needed.
 
-Onewaydoor-owned files under `onewaydoor-docs/`, `.github/workflows/`, reusable
-workflow callers, governance docs, and template/reference docs can normally be
-synced verbatim unless the target repo has an accepted exception recorded in
-`onewaydoor.config.yml` or the sync review note.
+Onewaydoor-owned files under `onewaydoor-docs/`, `.github/workflows/`
+(self-contained — no shared/reusable-workflows repo dependency), governance
+docs, and template/reference docs can normally be synced verbatim unless the
+target repo has an accepted exception recorded in `onewaydoor.config.yml` or
+the sync review note.
 
 ## Post-Import Review Checklist
 
