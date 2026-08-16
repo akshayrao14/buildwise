@@ -18,6 +18,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          if [[ "${{ github.event_name }}" != "pull_request" ]]; then
+            echo "Not a pull_request event (triggered via ${{ github.event_name }}); nothing to check."
+            exit 0
+          fi
           if [[ "${{ github.event.pull_request.head.ref }}" != "working" ]]; then
             echo "PRs into main must come from working (got '${{ github.event.pull_request.head.ref }}')."
             exit 1

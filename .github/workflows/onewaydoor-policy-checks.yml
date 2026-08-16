@@ -152,7 +152,10 @@ jobs:
 
           add_blocked(
               'Hardcoded credential-shaped configuration',
-              grep(r'aws_access_key_id\s*=|aws_secret_access_key\s*=|(AKIA|ASIA)[0-9A-Z]{16}'),
+              grep(
+                  r'aws_access_key_id\s*=|aws_secret_access_key\s*=|(AKIA|ASIA)[0-9A-Z]{16}'
+                  r'|(SUPABASE_(SERVICE_ROLE_KEY|KEY|ANON_KEY)|VERCEL_TOKEN)\s*[=:]\s*["\']?(eyJ|[A-Za-z0-9_\-]{20,})'
+              ),
           )
 
           def write_section(title, items):
