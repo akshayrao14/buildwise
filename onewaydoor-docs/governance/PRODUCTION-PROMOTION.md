@@ -17,9 +17,9 @@ PR and still not be ready for production promotion.
    repo settings if you've set up branch protection for this project (see
    `onewaydoor-docs/template/RELEASE-CHECKLIST.md`); if no one fills the
    role, this is a self-review checkpoint, not a skip.
-3. **Domain review.** If the project needs a production domain, confirm the
-   Reviewing Engineer has set up your production domain (through Vercel or
-   your DNS provider).
+3. **Domain review.** If the project needs a production domain, whoever fills
+   the Reviewing Engineer role confirms it is set up (through Vercel or your
+   DNS provider).
 4. **Deploy path review.** Confirm a real deployment workflow actually
    triggers from `main` for this project. The onewaydoor template does not
    ship one by default — `main` "triggers production deployments" only once

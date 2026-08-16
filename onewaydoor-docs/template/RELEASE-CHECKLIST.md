@@ -33,8 +33,8 @@ Developers.
 - [ ] Release/deployment CI/CD triggers only from `main`; `working` may run
   checks/previews but must not trigger production release.
 - [ ] `working` allows direct feature-branch merges and remains unprotected.
-- [ ] Feature/work branches are cut from `working`; accidental branches cut
-  from elsewhere are corrected before opening a release PR.
+- [ ] Feature/work branches are cut from `working`; branches not cut from
+  `working` are corrected before opening a release PR.
 - [ ] Force pushes are blocked on `main`.
 - [ ] Branch deletion is blocked on `main`.
 - [ ] Repo-level merge method settings (squash, merge-commit, or both)
@@ -82,16 +82,16 @@ Developers.
 - [ ] Agent inspects files, stack, package manager, branch, and remotes.
 - [ ] Agent checks for committed `.env`, missing `.gitignore`, and likely
   secrets.
-- [ ] Agent detects infra files such as Serverless, Terraform, CDK, SAM, or
-  Docker.
+- [ ] Agent detects infra files such as Serverless, Terraform, Docker, or
+  other infra-as-code files.
 - [ ] Agent flags drift from onewaydoor conventions.
 - [ ] Agent suggests small corrections before broad refactors.
 
 ## Drift correction examples
 
-- [ ] Agent escalates production domain setup to whoever fills the
-  Reviewing Engineer role for this project (through Vercel or the project's
-  DNS provider).
+- [ ] Whoever fills the Reviewing Engineer role confirms the production domain
+  is set up (through Vercel or the project's DNS provider) before it's
+  assumed live.
 - [ ] Agent catches production data, production secrets, or production
   account/project usage substituted in for local development.
 - [ ] Agent catches frontend direct database access.
