@@ -228,8 +228,8 @@ Before asking Stage 1 questions, infer what is already clear:
   activation. Say that implementation involving real external users,
   domain-sensitive data, or payments needs Reviewing Engineer approval before
   merge. Domain-sensitive data depends on the project: examples include
-  candidate/recruiter, healthcare/patient, employee/payroll, financial,
-  customer, or other regulated operational data.
+  customer, healthcare/patient, employee/payroll, financial,
+  candidate/recruiter, or other regulated operational data.
 
 Ask only missing or uncertain items. This list is the order to ask in, not a
 form — send one question, wait for the answer, then send the next:
@@ -247,7 +247,7 @@ When confirming inferred answers, use direct wording such as:
 
 - "I think this is a new project. Is that correct?"
 - "I think your short personal name is `jordan`. Is that correct?"
-- "I think the project name is `post-offer-engagement`. Is that correct?"
+- "I think the project name is `team-standup-tracker`. Is that correct?"
 - "I'll record the goal as: '<one-sentence goal>'. Is that accurate?"
 
 After these answers, update `PROJECT-CONTEXT.md`, seed `DESIGN.md`, create the
@@ -282,8 +282,8 @@ message.
    - No
    - Yes
    - Not sure yet
-3. Will it touch domain-sensitive data such as candidate/recruiter,
-   healthcare/patient, employee/payroll, financial, customer, or other regulated
+3. Will it touch domain-sensitive data such as customer, healthcare/patient,
+   employee/payroll, financial, candidate/recruiter, or other regulated
    operational data?
    - Yes, real domain-sensitive data
    - Only synthetic/demo data for now
@@ -304,8 +304,8 @@ and the agent is about to define data handling, when hosting/deployment is being
 discussed, when the Citizen Developer asks for production readiness, or when the
 agent is preparing review notes for the Reviewing Engineer.
 
-Ask corporate-login/domain questions only when sign-in, sign-up, auth, invites,
-or user provisioning is actually being designed. For internal-only tools, the
+Ask login/auth-provisioning questions only when sign-in, sign-up, invites, or
+user provisioning is actually being designed. For internal-only tools, the
 default convention is social login plus an explicit whitelist of approved users
 (see `AGENTS.md`'s Auth Convention) — no company-domain allowlist assumption,
 since there's no default company domain. Any external-user login, public
@@ -397,7 +397,10 @@ a tool creates an unpublished project record as a side effect, record it in
    - Yes
    - No
    - Not sure
-4. Does the project need transactional email?
+4. Which Supabase project region? This is a one-way-door decision — Supabase
+   doesn't support moving a project to a different region later without a
+   full data migration. Confirm explicitly, don't default silently.
+5. Does the project need transactional email?
    - No
    - Yes (Supabase's built-in email, or state a preferred provider)
    - Not sure yet
@@ -440,8 +443,10 @@ If it touches a Red Zone category, follow `AGENTS.md` before building.
 
 ## 2. Repository access
 
-For a new project, the agent should ask the Citizen Developer to contact the
-Reviewing Engineer when it is time to create the repo.
+For a new project, the Reviewing Engineer role can be self-filled, so repo
+creation is not gated on contacting someone else. If a Reviewing Engineer is
+filled by someone other than the Citizen Developer, loop them in when it is
+time to create the repo; if self-filled, just proceed.
 
 - `onewaydoor` is the GitHub template repo you fork or use as a template to
   create the new project repo.
@@ -466,7 +471,7 @@ failing the PR for historical repo state.
 
 For a repeatable import procedure, use
 `onewaydoor-docs/onboarding/EXISTING-REPO-IMPORT.md`. Prefer a squash merge
-from onewaydoor `main` over manual file copying so Git exposes conflicts and
+from onewaydoor `working` over manual file copying so Git exposes conflicts and
 Reviewing Engineer-visible decisions can be recorded.
 
 Use `archived_paths` only for historical, generated, local-only, or stale paths
@@ -531,12 +536,13 @@ run read-only checks:
 
 - inspect files, stack, package manager, branch, and remotes;
 - check for missing `.gitignore`, committed `.env`, or likely secrets;
-- identify infra files such as Serverless, Terraform, CDK, SAM, or Docker;
+- identify infra files such as Serverless, Terraform, Docker, or other
+  infra-as-code files;
 - scan for production domains/accounts, access keys, direct DB access,
   external login, payments, and domain-specific sensitive data categories;
-- identify the project's sensitive data domain, such as candidate/recruiter,
-  healthcare/patient, employee/payroll, financial, customer, or other regulated
-  operational data;
+- identify the project's sensitive data domain, such as customer,
+  healthcare/patient, employee/payroll, financial, candidate/recruiter, or
+  other regulated operational data;
 - document project-specific Red Zone categories in `DESIGN.md` or `SECURITY.md`
   so future PRs do not assume the default list is complete;
 - check whether a design-spec document and Project Journal exist;
@@ -685,9 +691,9 @@ Commit/push/PR cadence:
 
 ## 8. Review and release
 
-- Thin GitHub Actions caller workflows and the PR template are active. Exact
-  required-check behavior still depends on each repository's GitHub rulesets and
-  branch protection settings.
+- The self-contained onewaydoor GitHub Actions workflows and the PR template
+  are active. Exact required-check behavior still depends on each
+  repository's GitHub rulesets and branch protection settings.
 - Every PR should contain a lightweight review pack: summary, why, testing done,
   reviewer-focus files/flows, open questions, and rollback/revert note. Expand
   this for Red Zone, auth/login, deployment, production domain, external-service,
@@ -710,9 +716,9 @@ Commit/push/PR cadence:
     flagged for later review.
 - Useful "test now" examples:
   - run the app locally with synthetic/demo data;
-  - click through a Vercel preview or other non-production preview deployment;
-  - test a Vercel preview deployment with a Supabase development project,
-    using synthetic/anonymized data;
+  - click through a Vercel preview (or other non-production preview
+    deployment) backed by a Supabase development project, using
+    synthetic/anonymized data;
   - run unit tests, lint/typecheck, seed scripts, dry-runs, or sample imports
     that do not touch production data or production systems.
 - Useful "blocked on review" examples:
