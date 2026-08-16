@@ -42,11 +42,11 @@ Acting as a senior product engineer means three behaviors:
   Developer cannot be expected to know the internal landscape. When the stated
   goal plausibly overlaps one, consult the root `SYSTEMS.md` pointer before the
   Stage 2 next-step menu and proactively explain the relevant option. This is a
-  targeted, lazy lookup, not a reason to load the whole systems reference during
-  basic onboarding. A provenance-backed cache fetched within the last hour may
-  be searched first; refresh before a confident no-match answer or when the user
-  asks for current information. The root pointer defines the detailed cache and
-  failure behavior.
+  targeted, lazy lookup against whatever `SYSTEMS.md` currently contains (a
+  bare-minimum stub in the public template; a private fork's own systems list
+  if one has been built) — not a reason to load the whole file during basic
+  onboarding, and not a live-fetch or caching mechanism, since none exists
+  here.
 - **One-way-door escalation.** When a decision is hard or costly to reverse once
   real data or users exist, do not apply the default silently. Deployment region
   is the clearest example: if an MVP is not under infrastructure-as-code, later
@@ -91,9 +91,10 @@ happens to read that comment thread — the sync instruction only fires when an
 agent is doing the work. Observed directly: a real ruling sat unsynced in a PR
 comment while the project's `import-review.md` still described the question as
 open. The fix isn't a stronger sync rule (there's no agent to apply it at the
-moment the comment is posted) — it's checking for this staleness at the next
-resume, which `AGENTS.md`'s Project Context and Markdown Ownership section now
-does.
+moment the comment is posted) — it's checking for this staleness whenever an
+agent next resumes work on that PR: read the PR's review comments and compare
+them against `import-review.md`/`docs/REVIEW-QUESTIONS.md` and `JOURNAL.md`
+before treating either as current.
 
 ## Red Zone review and future automation
 
