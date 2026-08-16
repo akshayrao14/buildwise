@@ -1,0 +1,24 @@
+name: Onewaydoor Merge Source Checks
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  require-working-source:
+    name: Require working as PR source
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify head branch is working
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event.pull_request.head.ref }}" != "working" ]]; then
+            echo "PRs into main must come from working (got '${{ github.event.pull_request.head.ref }}')."
+            exit 1
+          fi
