@@ -78,14 +78,14 @@ governance decisions.
 The agent should:
 
 - follow the repo's branch convention; for fresh onewaydoor repos, cut work
-  branches from `pre-release`;
+  branches from `working`;
 - keep changes small and reviewable;
 - preserve finalized governance decisions unless you explicitly decide to
   reopen them;
-- avoid wholesale edits to `AGENTS.md`; propose or make only precise CTO-scoped
-  changes;
+- avoid wholesale edits to `AGENTS.md`; propose or make only precise,
+  narrowly-scoped changes;
 - update docs, TODOs, and release/testing notes when behavior changes;
-- raise a PR back to `pre-release` for review.
+- raise a PR back to `working` for review.
 
 This mode is for improving onewaydoor itself. It should not be used for normal
 Citizen Developer project work.
