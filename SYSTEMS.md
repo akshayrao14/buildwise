@@ -19,9 +19,9 @@ project needs to integrate with an existing internal system.
 
 ## Example entry (fictional, illustrative only)
 
-### Example: "Applicant Tracking Service"
+### Example: "Order Fulfillment Service"
 
-- Owns candidate records. Read access via its own API only — never
+- Owns order records. Read access via its own API only — never
   direct DB access (per Anti-Pattern Defaults in `AGENTS.md`).
 - Auth: internal service token, rotated quarterly.
 - Gotcha: pagination caps at 100 records per call.

@@ -314,10 +314,10 @@ Reviewing Engineer role.
 
 Examples of better inference wording:
 
-- "This sounds like it will use candidate phone numbers and conversation text.
-  I will treat candidate data as in scope unless this is synthetic/demo-only. Is
+- "This sounds like it will use customer phone numbers and conversation text.
+  I will treat customer data as in scope unless this is synthetic/demo-only. Is
   that right?"
-- "You said candidates receive WhatsApp messages, so I will record external
+- "You said customers receive WhatsApp messages, so I will record external
   users as involved but external login as not planned. Is that right?"
 
 External messaging channels such as WhatsApp, SMS, or email are integrations.
@@ -354,8 +354,8 @@ If any answer touches a Red Zone category, follow `AGENTS.md` before building.
 - prepare Reviewing Engineer notes;
 - stop here.
 
-Ask product-definition questions, such as candidate self-report versus recruiter
-inputs, only after the Citizen Developer chooses scope/design planning.
+Ask product-definition questions, such as user self-report versus staff-entered
+data, only after the Citizen Developer chooses scope/design planning.
 
 When v1 scope/design planning starts, infer whether the project likely needs a
 UI before asking. Then ask one product-facing question only when the answer
