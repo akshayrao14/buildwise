@@ -22,6 +22,17 @@ Reviewing Engineer mode, or template-maintenance mode. See
 
 ---
 
+## Branch Model and Onboarding
+
+Two branches: `main` (production, PR required, gated by
+`onewaydoor-merge-source-checks.yml` requiring the PR come from `working`) and
+`working` (the everyday build branch — push directly, no PR required).
+
+If the user says `Start Onewaydoor`, read
+`onewaydoor-docs/onboarding/ONBOARDING.md` for the full staged onboarding flow.
+
+---
+
 ## Current Production Stack
 
 > Format: `Category: current choice — use unless [stated reason]`
@@ -153,6 +164,13 @@ approaches to choose between.
   if one is available to you.
 - (add other recurring anti-patterns here as they're observed)
 
+**Frontend direct database access (documented, not mechanically enforced):**
+the policy check for this only warns (`add_review`, non-blocking) rather than
+blocking the PR — it flags client-side code containing a database connection
+string or ORM call against the DB directly, but merge is not gated on it. Do
+not tell a citizen dev this is mechanically blocked; treat the anti-pattern
+rule above as the actual backstop and the check as a review nudge only.
+
 ## Mechanically Enforced Rules
 
 No human review needed for these — a lint/static check either passes or the
@@ -163,9 +181,6 @@ option doesn't exist in the first place.
   secrets locally; a GitHub Action re-scans every PR as the unbypassable
   backstop (a hook alone can be skipped with `--no-verify` or simply not
   installed).
-- **Frontend direct database access:** a policy check flags client-side code
-  containing a database connection string or ORM call against the DB
-  directly (see Anti-Pattern Defaults above).
 
 ## Auth Convention (documented, not mechanically enforced)
 
