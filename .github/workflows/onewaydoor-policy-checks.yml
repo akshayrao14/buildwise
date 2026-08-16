@@ -1,0 +1,192 @@
+name: Onewaydoor Policy Checks
+
+on:
+  pull_request:
+  push:
+    branches:
+      - working
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  onewaydoor-policy:
+    name: Onewaydoor policy scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Scan for onewaydoor policy drift
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          import re
+          import subprocess
+          import sys
+
+          summary_path = Path(os.environ.get('GITHUB_STEP_SUMMARY', '/tmp/onewaydoor-summary.md'))
+          event_name = os.environ.get('GITHUB_EVENT_NAME', '')
+          github_sha = os.environ.get('GITHUB_SHA', '')
+          base_sha = '${{ github.event.pull_request.base.sha }}'
+
+          def parse_config(path=Path('onewaydoor.config.yml')):
+              config = {
+                  'project_type': 'fresh-template',
+                  'policy_mode': 'strict',
+                  'scan_scope': 'full-repo',
+                  'archived_paths': [],
+              }
+              if not path.exists():
+                  return config
+
+              current_key = None
+              for raw in path.read_text().splitlines():
+                  line = raw.split('#', 1)[0].rstrip()
+                  if not line.strip():
+                      continue
+
+                  list_item = re.match(r'^\s*-\s*(.+?)\s*$', line)
+                  if list_item and current_key:
+                      config.setdefault(current_key, [])
+                      config[current_key].append(list_item.group(1).strip('"\''))
+                      continue
+
+                  current_key = None
+                  match = re.match(r'^([A-Za-z0-9_]+):\s*(.*?)\s*$', line)
+                  if not match:
+                      continue
+
+                  key, value = match.groups()
+                  if value == '':
+                      current_key = key
+                      config[key] = []
+                      continue
+
+                  config[key] = value.strip().strip('"\'')
+
+              if config.get('project_type') == 'existing-import':
+                  if config.get('policy_mode') == 'strict':
+                      config['policy_mode'] = 'advisory'
+                  if config.get('scan_scope') == 'full-repo':
+                      config['scan_scope'] = 'changed-files'
+              return config
+
+          config = parse_config()
+          policy_mode = str(config.get('policy_mode', 'strict'))
+          scan_scope = str(config.get('scan_scope', 'full-repo'))
+          is_advisory = policy_mode == 'advisory'
+
+          excluded_exact = {
+              'AGENTS.md', 'CLAUDE.md', 'GEMINI.md', 'SYSTEMS.md',
+              'PROJECT-CONTEXT.md', 'DESIGN.md', 'JOURNAL.md',
+              'README.md', 'TODO.md',
+          }
+          excluded_prefixes = ['onewaydoor-docs/', '.git/', '.github/']
+          excluded_prefixes.extend(str(p).rstrip('/') + '/' for p in config.get('archived_paths', []))
+
+          def is_scannable(path):
+              p = str(path)
+              if p in excluded_exact:
+                  return False
+              return not any(p.startswith(prefix) for prefix in excluded_prefixes)
+
+          def run_git(args):
+              return subprocess.run(['git', *args], text=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL).stdout
+
+          if scan_scope == 'changed-files' and event_name == 'pull_request' and base_sha and github_sha:
+              files = run_git(['diff', '--name-only', '--diff-filter=ACMRT', base_sha, github_sha, '--']).splitlines()
+          else:
+              files = run_git(['ls-files']).splitlines()
+
+          files = [Path(f) for f in files if is_scannable(f) and Path(f).is_file()]
+
+          text_files = []
+          for file in files:
+              try:
+                  file.read_text(errors='ignore')
+              except OSError:
+                  continue
+              text_files.append(file)
+
+          blocked = []
+          review = []
+
+          def grep(pattern):
+              rx = re.compile(pattern, re.IGNORECASE)
+              hits = []
+              for file in text_files:
+                  try:
+                      lines = file.read_text(errors='ignore').splitlines()
+                  except OSError:
+                      continue
+                  for index, line in enumerate(lines, start=1):
+                      if rx.search(line):
+                          hits.append(f'{file}:{index}:{line[:500]}')
+              return hits
+
+          def add_blocked(title, hits):
+              if not hits:
+                  return
+              if is_advisory:
+                  review.append((f'Would block in strict mode: {title}', hits))
+              else:
+                  blocked.append((title, hits))
+
+          def add_review(title, hits):
+              if hits:
+                  review.append((title, hits))
+
+          add_review(
+              'Possible frontend direct database access or committed DB URL',
+              grep(r'NEXT_PUBLIC_.*(DATABASE|POSTGRES|MYSQL|MONGO)|VITE_.*(DATABASE|POSTGRES|MYSQL|MONGO)|postgres://|mysql://|mongodb(\+srv)?://'),
+          )
+
+          add_blocked(
+              'Hardcoded credential-shaped configuration',
+              grep(r'aws_access_key_id\s*=|aws_secret_access_key\s*=|(AKIA|ASIA)[0-9A-Z]{16}'),
+          )
+
+          def write_section(title, items):
+              with summary_path.open('a') as summary:
+                  summary.write(f'## {title}\n\n')
+                  summary.write('```text\n')
+                  for item in items[:100]:
+                      summary.write(f'{item}\n')
+                  if len(items) > 100:
+                      summary.write(f'... {len(items) - 100} more hit(s) omitted\n')
+                  summary.write('```\n\n')
+
+          with summary_path.open('a') as summary:
+              summary.write('# Onewaydoor policy scan\n\n')
+              summary.write(f'- Project type: `{config.get("project_type")}`\n')
+              summary.write(f'- Policy mode: `{policy_mode}`\n')
+              summary.write(f'- Scan scope: `{scan_scope}`\n')
+              summary.write(f'- Files scanned: `{len(text_files)}`\n\n')
+
+          for title, hits in blocked:
+              print(f'::error title={title}::{len(hits)} hit(s)')
+              write_section(f'Blocked: {title}', hits)
+
+          for title, hits in review:
+              print(f'::warning title={title}::{len(hits)} hit(s)')
+              write_section(f'Review required: {title}', hits)
+
+          with summary_path.open('a') as summary:
+              if blocked:
+                  summary.write('Blocked findings must be fixed before merge.\n')
+              elif review:
+                  summary.write('Review-required findings were found. Confirm Reviewing Engineer approval in the PR.\n')
+              else:
+                  summary.write('No onewaydoor policy findings.\n')
+
+          sys.exit(1 if blocked else 0)
+          PY
