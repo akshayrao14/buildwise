@@ -1,0 +1,215 @@
+name: Buildwise Security Checks
+
+on:
+  pull_request:
+  push:
+    branches:
+      - working
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  secrets:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
+        with:
+          fetch-depth: 0
+
+      - name: Read buildwise check mode
+        id: mode
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          config_value() {
+            local key="$1"
+            local default="$2"
+            if [[ -f buildwise.config.yml ]]; then
+              local value
+              value="$(awk -F: -v key="$key" '$1 == key {print $2; exit}' buildwise.config.yml | sed 's/^ *//; s/ *$//' | tr -d '"')"
+              if [[ -n "$value" ]]; then
+                echo "$value"
+                return
+              fi
+            fi
+            echo "$default"
+          }
+
+          project_type="$(config_value project_type fresh-template)"
+          secret_scan_mode="$(config_value secret_scan_mode full-history)"
+          semgrep_scope="$(config_value semgrep_scope full-repo)"
+
+          if [[ "$project_type" == "existing-import" ]]; then
+            [[ "$secret_scan_mode" == "full-history" ]] && secret_scan_mode="diff"
+            [[ "$semgrep_scope" == "full-repo" ]] && semgrep_scope="changed-files"
+          fi
+
+          echo "secret_scan_mode=$secret_scan_mode" >> "$GITHUB_OUTPUT"
+          echo "semgrep_scope=$semgrep_scope" >> "$GITHUB_OUTPUT"
+
+      - name: Install Gitleaks CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz -o /tmp/gitleaks.tar.gz
+          tar -xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks
+          sudo mv /tmp/gitleaks /usr/local/bin/gitleaks
+
+      - name: Run Gitleaks
+        shell: bash
+        env:
+          SECRET_SCAN_MODE: ${{ steps.mode.outputs.secret_scan_mode }}
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BEFORE_SHA: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          changed_files() {
+            local base=""
+            if [[ "$EVENT_NAME" == "pull_request" ]]; then
+              base="$PR_BASE_SHA"
+            elif [[ "$EVENT_NAME" == "push" ]]; then
+              base="$BEFORE_SHA"
+            fi
+
+            if [[ -z "$base" || "$base" =~ ^0+$ ]]; then
+              if git rev-parse HEAD~1 >/dev/null 2>&1; then
+                base="$(git rev-parse HEAD~1)"
+              else
+                git ls-files
+                return
+              fi
+            fi
+
+            git diff --name-only --diff-filter=ACMRT "$base" "$HEAD_SHA" --
+          }
+
+          if [[ "$SECRET_SCAN_MODE" == "diff" ]]; then
+            tmp="$(mktemp -d)"
+            changed_files > /tmp/buildwise-secret-files
+
+            while IFS= read -r file; do
+              [[ -f "$file" ]] || continue
+              mkdir -p "$tmp/$(dirname "$file")"
+              cp "$file" "$tmp/$file"
+            done < /tmp/buildwise-secret-files
+
+            if [[ -z "$(find "$tmp" -type f -print -quit)" ]]; then
+              echo "No changed files to scan for secrets." >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+
+            gitleaks detect --no-git --source "$tmp" --redact --verbose
+          else
+            gitleaks detect --source . --redact --verbose
+          fi
+
+  sast:
+    name: Semgrep SAST
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
+        with:
+          fetch-depth: 0
+
+      - name: Read buildwise check mode
+        id: mode
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          config_value() {
+            local key="$1"
+            local default="$2"
+            if [[ -f buildwise.config.yml ]]; then
+              local value
+              value="$(awk -F: -v key="$key" '$1 == key {print $2; exit}' buildwise.config.yml | sed 's/^ *//; s/ *$//' | tr -d '"')"
+              if [[ -n "$value" ]]; then
+                echo "$value"
+                return
+              fi
+            fi
+            echo "$default"
+          }
+
+          project_type="$(config_value project_type fresh-template)"
+          semgrep_scope="$(config_value semgrep_scope full-repo)"
+          policy_mode="$(config_value policy_mode strict)"
+
+          if [[ "$project_type" == "existing-import" ]]; then
+            [[ "$semgrep_scope" == "full-repo" ]] && semgrep_scope="changed-files"
+            [[ "$policy_mode" == "strict" ]] && policy_mode="advisory"
+          fi
+
+          echo "semgrep_scope=$semgrep_scope" >> "$GITHUB_OUTPUT"
+          echo "policy_mode=$policy_mode" >> "$GITHUB_OUTPUT"
+
+      - name: Install Semgrep
+        run: python -m pip install --upgrade semgrep==1.164.0
+
+      - name: Run Semgrep
+        shell: bash
+        env:
+          SEMGREP_SCOPE: ${{ steps.mode.outputs.semgrep_scope }}
+          POLICY_MODE: ${{ steps.mode.outputs.policy_mode }}
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BEFORE_SHA: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          args=(scan --config p/ci --metrics=off --exclude buildwise-docs --exclude .git)
+
+          changed_files() {
+            local base=""
+            if [[ "$EVENT_NAME" == "pull_request" ]]; then
+              base="$PR_BASE_SHA"
+            elif [[ "$EVENT_NAME" == "push" ]]; then
+              base="$BEFORE_SHA"
+            fi
+
+            if [[ -z "$base" || "$base" =~ ^0+$ ]]; then
+              if git rev-parse HEAD~1 >/dev/null 2>&1; then
+                base="$(git rev-parse HEAD~1)"
+              else
+                git ls-files
+                return
+              fi
+            fi
+
+            git diff --name-only --diff-filter=ACMRT "$base" "$HEAD_SHA" --
+          }
+
+          run_semgrep() {
+            if [[ "$POLICY_MODE" == "advisory" ]]; then
+              semgrep "$@" || {
+                echo "Semgrep findings are advisory for this buildwise mode." >> "$GITHUB_STEP_SUMMARY"
+                exit 0
+              }
+            else
+              semgrep "$@" --error
+            fi
+          }
+
+          if [[ "$SEMGREP_SCOPE" == "changed-files" ]]; then
+            mapfile -t targets < <(changed_files | grep -Ev '^(buildwise-docs/|\.git/)' || true)
+
+            if [[ "${#targets[@]}" -eq 0 ]]; then
+              echo "No changed files to scan with Semgrep." >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+
+            run_semgrep "${args[@]}" "${targets[@]}"
+          else
+            run_semgrep "${args[@]}"
+          fi

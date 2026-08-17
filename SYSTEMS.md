@@ -1,7 +1,7 @@
 # SYSTEMS.md — Internal Systems Reference (public stub)
 
 > This is a bare-minimum example for the public template. A private fork
-> (e.g. TERN's internal repo) replaces this file's content with real
+> (e.g. your organization's internal repo) replaces this file's content with real
 > internal services, schemas, and portal details — same filename, so
 > `AGENTS.md`'s pointer to this file never has to change between the
 > public template and a private fork.
@@ -19,9 +19,9 @@ project needs to integrate with an existing internal system.
 
 ## Example entry (fictional, illustrative only)
 
-### Example: "Applicant Tracking Service"
+### Example: "Order Fulfillment Service"
 
-- Owns candidate records. Read access via its own API only — never
+- Owns order records. Read access via its own API only — never
   direct DB access (per Anti-Pattern Defaults in `AGENTS.md`).
 - Auth: internal service token, rotated quarterly.
 - Gotcha: pagination caps at 100 records per call.
@@ -31,5 +31,5 @@ project needs to integrate with an existing internal system.
 Real forks: replace everything below the format section above with your
 organization's actual internal services. First draft is typically written
 by an agent reading real configs/schemas directly (e.g. from a parent
-directory containing your other repositories), then edited by the CTO
-for accuracy before committing.
+directory containing your other repositories), then reviewed and edited
+for accuracy by whoever owns your project's technical decisions before committing.

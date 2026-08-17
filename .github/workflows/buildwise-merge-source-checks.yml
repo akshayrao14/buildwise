@@ -1,0 +1,31 @@
+name: Buildwise Merge Source Checks
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  require-working-source:
+    name: Require working as PR source
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify head branch is working
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" != "pull_request" ]]; then
+            echo "Not a pull_request event (triggered via $EVENT_NAME); nothing to check."
+            exit 0
+          fi
+          if [[ "$HEAD_REF" != "working" ]]; then
+            echo "PRs into main must come from working (got '$HEAD_REF')."
+            exit 1
+          fi

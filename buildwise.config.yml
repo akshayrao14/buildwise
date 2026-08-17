@@ -1,0 +1,28 @@
+# buildwise project configuration
+# project_type: fresh-template | existing-import
+project_type: fresh-template
+
+# policy_mode: strict | advisory
+# strict blocks the PR on a policy-check hit; advisory reports only.
+policy_mode: strict
+
+# scan_scope: full-repo | changed-files
+# existing-import projects should typically use changed-files.
+scan_scope: full-repo
+
+# project_checks_mode: auto | advisory | disabled
+# auto runs lint/typecheck/test as blocking, build as advisory (see build_check_mode).
+project_checks_mode: auto
+
+# build_check_mode: advisory | blocking
+build_check_mode: advisory
+
+# secret_scan_mode: full-history | diff
+secret_scan_mode: full-history
+
+# semgrep_scope: full-repo | changed-files
+semgrep_scope: full-repo
+
+# archived_paths: paths excluded from policy/security scans (historical,
+# generated, local-only, or stale paths only — never an active source of truth)
+archived_paths: []
