@@ -23,6 +23,8 @@ jobs:
 
       - name: Scan for buildwise policy drift
         shell: bash
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           set -euo pipefail
 
@@ -36,7 +38,7 @@ jobs:
           summary_path = Path(os.environ.get('GITHUB_STEP_SUMMARY', '/tmp/buildwise-summary.md'))
           event_name = os.environ.get('GITHUB_EVENT_NAME', '')
           github_sha = os.environ.get('GITHUB_SHA', '')
-          base_sha = '${{ github.event.pull_request.base.sha }}'
+          base_sha = os.environ.get('PR_BASE_SHA', '')
 
           def parse_config(path=Path('buildwise.config.yml')):
               config = {
