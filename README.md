@@ -9,13 +9,13 @@
 3. Open your new repo folder in that agent.
 4. Paste this exact phrase and send it:
 
-   Start Onewaydoor
+   Start Buildwise
 
 5. The agent takes it from there. It asks what you're building, one question
    at a time, and saves your answers in the repo as you go.
 
 Have a technical friend/advisor reviewing your work? See
-`onewaydoor-docs/onboarding/REVIEWING-ENGINEER.md` for their setup steps
+`buildwise-docs/onboarding/REVIEWING-ENGINEER.md` for their setup steps
 first. Going solo is fine too — the agent will ask about that.
 
 This page is a placeholder. Once you're underway, your agent will replace it

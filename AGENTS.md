@@ -13,23 +13,23 @@ Keep it short; every line competes for the agent's attention on every task.
 
 ---
 
-## Onewaydoor Operating Mode
+## Buildwise Operating Mode
 
 Before substantial work, identify the mode: Citizen Developer project mode,
 Reviewing Engineer mode, or template-maintenance mode. See
-`onewaydoor-docs/governance/OPERATING-MODES.md`. In project mode, treat
-`onewaydoor-docs/` as read-only reference material.
+`buildwise-docs/governance/OPERATING-MODES.md`. In project mode, treat
+`buildwise-docs/` as read-only reference material.
 
 ---
 
 ## Branch Model and Onboarding
 
 Two branches: `main` (production, PR required, gated by
-`onewaydoor-merge-source-checks.yml` requiring the PR come from `working`) and
+`buildwise-merge-source-checks.yml` requiring the PR come from `working`) and
 `working` (the everyday build branch — push directly, no PR required).
 
-If the user says `Start Onewaydoor`, read
-`onewaydoor-docs/onboarding/ONBOARDING.md` for the full staged onboarding flow.
+If the user says `Start Buildwise`, read
+`buildwise-docs/onboarding/ONBOARDING.md` for the full staged onboarding flow.
 
 ---
 
@@ -66,7 +66,7 @@ a silent one.
 
 ## Reviewing Engineer Role
 
-Onewaydoor assumes no dedicated tech team. The Reviewing Engineer role — a
+Buildwise assumes no dedicated tech team. The Reviewing Engineer role — a
 second set of eyes on Red Zone work — is **self-fillable**: the citizen dev
 themself, a technical friend/advisor, or explicitly skipped with an
 acknowledged risk noted in `JOURNAL.md`. There is no assumption of a
@@ -99,7 +99,7 @@ slightly less complete trace), unlike a missed Red Zone gate.
 For what internal services/APIs already exist and what they do, see
 `SYSTEMS.md` — read on demand when relevant (e.g. a project needs to
 integrate with an existing system), not auto-loaded every session. Most
-onewaydoor projects won't have one yet; `SYSTEMS.md` stays an empty,
+buildwise projects won't have one yet; `SYSTEMS.md` stays an empty,
 documented pattern until one is built. If you build or adopt an internal
 tools catalog later, point `SYSTEMS.md` at it — the filename never has to
 change, so this pointer line doesn't either.
@@ -126,7 +126,7 @@ genuinely high-stakes or ambiguous:
 - Pause before Red Zone categories (see below) — those always get a second
   look, self-provided or not, before merge.
 
-The periodic instruction-surface audit (`onewaydoor-docs/template/AUDIT-PROMPT.md`)
+The periodic instruction-surface audit (`buildwise-docs/template/AUDIT-PROMPT.md`)
 is the backstop for whatever this file and its principles still miss — run it
 periodically, not just once.
 

@@ -1,4 +1,4 @@
 # Project TODO
 
 Project-owned TODO placeholder. See
-`onewaydoor-docs/onboarding/ONBOARDING.md` for onewaydoor startup instructions.
+`buildwise-docs/onboarding/ONBOARDING.md` for buildwise startup instructions.

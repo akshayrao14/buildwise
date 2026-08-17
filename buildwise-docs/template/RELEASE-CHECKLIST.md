@@ -1,17 +1,17 @@
-# Onewaydoor Release Checklist
+# Buildwise Release Checklist
 
-Use this to test the onewaydoor template before releasing it to Citizen
+Use this to test the buildwise template before releasing it to Citizen
 Developers.
 
 ## GitHub template setup
 
-- [ ] `akshayrao14/onewaydoor` is marked as a GitHub template repo.
+- [ ] `akshayrao14/buildwise` is marked as a GitHub template repo.
 - [ ] Repo is public.
 - [ ] Default branch is `working`.
 - [ ] Template creation includes both branches: `main` and `working`.
 - [ ] A test repo can be created from the template under `akshayrao14` (or
   wherever this project's copy lives).
-- [ ] Test repo name follows `owd-<dev-name>-<project-name>` (or your own
+- [ ] Test repo name follows `bw-<dev-name>-<project-name>` (or your own
   preference).
 - [ ] Whoever fills the Reviewing Engineer role applies repo settings after
   creation; GitHub template creation does not reliably copy branch
@@ -47,17 +47,17 @@ Developers.
 ## First Citizen Developer session
 
 - [ ] Whoever fills the Reviewing Engineer role can follow
-  `onewaydoor-docs/onboarding/REVIEWING-ENGINEER.md` without extra
+  `buildwise-docs/onboarding/REVIEWING-ENGINEER.md` without extra
   explanation.
 - [ ] Citizen Developer can clone the generated repo.
 - [ ] Citizen Developer can paste exactly:
 
   ```text
-  Start Onewaydoor
+  Start Buildwise
   ```
 
 - [ ] Agent reads `AGENTS.md`, `PROJECT-CONTEXT.md`, and
-  `onewaydoor-docs/onboarding/ONBOARDING.md`.
+  `buildwise-docs/onboarding/ONBOARDING.md`.
 - [ ] Agent asks whether this is a new project or existing project.
 - [ ] Agent asks for Citizen Developer name, project name, short goal, users,
   and Red Zone signals.
@@ -74,7 +74,7 @@ Developers.
   instead of continuing into product-definition questions automatically.
 - [ ] Agent updates project-owned `PROJECT-CONTEXT.md`, `DESIGN.md`,
   `JOURNAL.md`, `README.md`, and `TODO.md` during first onboarding.
-- [ ] Agent does not confuse `onewaydoor-docs/` files with project-owned
+- [ ] Agent does not confuse `buildwise-docs/` files with project-owned
   files.
 
 ## Existing project intake
@@ -84,7 +84,7 @@ Developers.
   secrets.
 - [ ] Agent detects infra files such as Serverless, Terraform, Docker, or
   other infra-as-code files.
-- [ ] Agent flags drift from onewaydoor conventions.
+- [ ] Agent flags drift from buildwise conventions.
 - [ ] Agent suggests small corrections before broad refactors.
 
 ## Drift correction examples
@@ -104,15 +104,15 @@ Developers.
 
 - [ ] Fresh-template root project-owned seed files are minimal and do not
   contain evolving onboarding instructions, startup phrase details, state
-  routing tables, or process rules that belong in onewaydoor-owned docs.
+  routing tables, or process rules that belong in buildwise-owned docs.
 - [ ] Project-specific `README.md` is useful to a non-engineer.
 - [ ] Project-specific `TODO.md` is maintained separately from
-  onewaydoor-owned docs.
+  buildwise-owned docs.
 - [ ] `PROJECT-CONTEXT.md` points future agents to the active project context.
 - [ ] `DESIGN.md` exists and reflects current project state.
 - [ ] `JOURNAL.md` has a seed entry.
 - [ ] Journal entries are appended when `DESIGN.md` changes.
-- [ ] Existing onewaydoor-project syncs preserve active project-owned files
+- [ ] Existing buildwise-project syncs preserve active project-owned files
   unless the sync intentionally changes that project's content.
 
 ## Local commit-time checks
@@ -142,7 +142,7 @@ Developers.
 
 ## Production promotion
 
-- [ ] `onewaydoor-docs/governance/PRODUCTION-PROMOTION.md` exists and defines
+- [ ] `buildwise-docs/governance/PRODUCTION-PROMOTION.md` exists and defines
   what a `working` -> `main` promotion requires.
 - [ ] Whoever fills the Reviewing Engineer role can follow it to check domain
   setup, deploy path, data handling, and Red Zone history before approving a
@@ -152,17 +152,17 @@ Developers.
 
 ## GitHub Actions / workflows
 
-- [ ] Project repos have the full self-contained onewaydoor workflow files
+- [ ] Project repos have the full self-contained buildwise workflow files
   under `.github/workflows/` — no reusable-workflow-repo dependency to
   verify.
-- [ ] `onewaydoor-merge-source-checks.yml` verifies PRs into `main` come
+- [ ] `buildwise-merge-source-checks.yml` verifies PRs into `main` come
   from `working`.
-- [ ] `onewaydoor-security-checks.yml` covers secret scanning and SAST.
-- [ ] `onewaydoor-policy-checks.yml` covers drift checks.
-- [ ] `onewaydoor-project-checks.yml` reports script failures clearly:
+- [ ] `buildwise-security-checks.yml` covers secret scanning and SAST.
+- [ ] `buildwise-policy-checks.yml` covers drift checks.
+- [ ] `buildwise-project-checks.yml` reports script failures clearly:
   package manager, scripts found/run, result, enforcement mode, and local
   repro command.
-- [ ] `onewaydoor-project-checks.yml` runs all available scripts instead of
+- [ ] `buildwise-project-checks.yml` runs all available scripts instead of
   stopping at the first failure.
 - [ ] `lint`, `typecheck`, and `test` failures are blocking in default
   `project_checks_mode: auto`.

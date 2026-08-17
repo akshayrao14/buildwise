@@ -1,4 +1,4 @@
-name: Onewaydoor Security Checks
+name: Buildwise Security Checks
 
 on:
   pull_request:
@@ -21,7 +21,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Read onewaydoor check mode
+      - name: Read buildwise check mode
         id: mode
         shell: bash
         run: |
@@ -30,9 +30,9 @@ jobs:
           config_value() {
             local key="$1"
             local default="$2"
-            if [[ -f onewaydoor.config.yml ]]; then
+            if [[ -f buildwise.config.yml ]]; then
               local value
-              value="$(awk -F: -v key="$key" '$1 == key {print $2; exit}' onewaydoor.config.yml | sed 's/^ *//; s/ *$//' | tr -d '"')"
+              value="$(awk -F: -v key="$key" '$1 == key {print $2; exit}' buildwise.config.yml | sed 's/^ *//; s/ *$//' | tr -d '"')"
               if [[ -n "$value" ]]; then
                 echo "$value"
                 return
@@ -94,13 +94,13 @@ jobs:
 
           if [[ "$SECRET_SCAN_MODE" == "diff" ]]; then
             tmp="$(mktemp -d)"
-            changed_files > /tmp/onewaydoor-secret-files
+            changed_files > /tmp/buildwise-secret-files
 
             while IFS= read -r file; do
               [[ -f "$file" ]] || continue
               mkdir -p "$tmp/$(dirname "$file")"
               cp "$file" "$tmp/$file"
-            done < /tmp/onewaydoor-secret-files
+            done < /tmp/buildwise-secret-files
 
             if [[ -z "$(find "$tmp" -type f -print -quit)" ]]; then
               echo "No changed files to scan for secrets." >> "$GITHUB_STEP_SUMMARY"
@@ -121,7 +121,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Read onewaydoor check mode
+      - name: Read buildwise check mode
         id: mode
         shell: bash
         run: |
@@ -130,9 +130,9 @@ jobs:
           config_value() {
             local key="$1"
             local default="$2"
-            if [[ -f onewaydoor.config.yml ]]; then
+            if [[ -f buildwise.config.yml ]]; then
               local value
-              value="$(awk -F: -v key="$key" '$1 == key {print $2; exit}' onewaydoor.config.yml | sed 's/^ *//; s/ *$//' | tr -d '"')"
+              value="$(awk -F: -v key="$key" '$1 == key {print $2; exit}' buildwise.config.yml | sed 's/^ *//; s/ *$//' | tr -d '"')"
               if [[ -n "$value" ]]; then
                 echo "$value"
                 return
@@ -168,7 +168,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          args=(scan --config p/ci --metrics=off --exclude onewaydoor-docs --exclude .git)
+          args=(scan --config p/ci --metrics=off --exclude buildwise-docs --exclude .git)
 
           changed_files() {
             local base=""
@@ -193,7 +193,7 @@ jobs:
           run_semgrep() {
             if [[ "$POLICY_MODE" == "advisory" ]]; then
               semgrep "$@" || {
-                echo "Semgrep findings are advisory for this onewaydoor mode." >> "$GITHUB_STEP_SUMMARY"
+                echo "Semgrep findings are advisory for this buildwise mode." >> "$GITHUB_STEP_SUMMARY"
                 exit 0
               }
             else
@@ -202,7 +202,7 @@ jobs:
           }
 
           if [[ "$SEMGREP_SCOPE" == "changed-files" ]]; then
-            mapfile -t targets < <(changed_files | grep -Ev '^(onewaydoor-docs/|\.git/)' || true)
+            mapfile -t targets < <(changed_files | grep -Ev '^(buildwise-docs/|\.git/)' || true)
 
             if [[ "${#targets[@]}" -eq 0 ]]; then
               echo "No changed files to scan with Semgrep." >> "$GITHUB_STEP_SUMMARY"

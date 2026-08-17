@@ -1,4 +1,4 @@
-name: Onewaydoor Policy Checks
+name: Buildwise Policy Checks
 
 on:
   pull_request:
@@ -12,8 +12,8 @@ permissions:
   contents: read
 
 jobs:
-  onewaydoor-policy:
-    name: Onewaydoor policy scan
+  buildwise-policy:
+    name: Buildwise policy scan
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -21,7 +21,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Scan for onewaydoor policy drift
+      - name: Scan for buildwise policy drift
         shell: bash
         run: |
           set -euo pipefail
@@ -33,12 +33,12 @@ jobs:
           import subprocess
           import sys
 
-          summary_path = Path(os.environ.get('GITHUB_STEP_SUMMARY', '/tmp/onewaydoor-summary.md'))
+          summary_path = Path(os.environ.get('GITHUB_STEP_SUMMARY', '/tmp/buildwise-summary.md'))
           event_name = os.environ.get('GITHUB_EVENT_NAME', '')
           github_sha = os.environ.get('GITHUB_SHA', '')
           base_sha = '${{ github.event.pull_request.base.sha }}'
 
-          def parse_config(path=Path('onewaydoor.config.yml')):
+          def parse_config(path=Path('buildwise.config.yml')):
               config = {
                   'project_type': 'fresh-template',
                   'policy_mode': 'strict',
@@ -90,7 +90,7 @@ jobs:
               'PROJECT-CONTEXT.md', 'DESIGN.md', 'JOURNAL.md',
               'README.md', 'TODO.md',
           }
-          excluded_prefixes = ['onewaydoor-docs/', '.git/', '.github/']
+          excluded_prefixes = ['buildwise-docs/', '.git/', '.github/']
           excluded_prefixes.extend(str(p).rstrip('/') + '/' for p in config.get('archived_paths', []))
 
           def is_scannable(path):
@@ -169,7 +169,7 @@ jobs:
                   summary.write('```\n\n')
 
           with summary_path.open('a') as summary:
-              summary.write('# Onewaydoor policy scan\n\n')
+              summary.write('# Buildwise policy scan\n\n')
               summary.write(f'- Project type: `{config.get("project_type")}`\n')
               summary.write(f'- Policy mode: `{policy_mode}`\n')
               summary.write(f'- Scan scope: `{scan_scope}`\n')
@@ -189,7 +189,7 @@ jobs:
               elif review:
                   summary.write('Review-required findings were found. Confirm Reviewing Engineer approval in the PR.\n')
               else:
-                  summary.write('No onewaydoor policy findings.\n')
+                  summary.write('No buildwise policy findings.\n')
 
           sys.exit(1 if blocked else 0)
           PY

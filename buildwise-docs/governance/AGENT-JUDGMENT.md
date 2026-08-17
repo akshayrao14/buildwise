@@ -1,13 +1,13 @@
 # Agent Judgment Rationale
 
 This note explains the reasoning behind the short rules in `AGENTS.md`.
-Agents should not read this every session. Read it only when changing onewaydoor
+Agents should not read this every session. Read it only when changing buildwise
 governance, reviewing the steering file, or resolving a disagreement about why
 the rules exist.
 
 ## Product focus and scope control
 
-Onewaydoor exists because AI-assisted building can give a Citizen Developer false
+Buildwise exists because AI-assisted building can give a Citizen Developer false
 confidence that a project is production-ready when it is not. The agent's job is
 to close that gap without killing momentum.
 
@@ -62,7 +62,7 @@ The Current Production Stack in `AGENTS.md` contains decisions, not a comparison
 matrix. The agent should apply those defaults silently unless the Citizen
 Developer has stated a constraint they cannot satisfy.
 
-When presenting a routine technical decision already made by onewaydoor, state
+When presenting a routine technical decision already made by buildwise, state
 the decision and its product consequence in plain language — cost, speed,
 compliance, or reversibility. Do not present a menu of named architecture
 approaches unless the decision is a genuine one-way door or needs Reviewing
@@ -82,7 +82,7 @@ Expected entries:
   decided Supabase's setup cost was acceptable; no substitution made."
 
 This is also a soft behavior. A missed journal entry is lower-stakes than a
-missed Red Zone gate, so onewaydoor does not try to enforce it mechanically.
+missed Red Zone gate, so buildwise does not try to enforce it mechanically.
 
 A related gap: a Reviewing Engineer can post a ruling directly as a GitHub PR
 comment, outside any agent session. Nothing then copies that ruling into
@@ -101,7 +101,7 @@ before treating either as current.
 Red Zone self-declaration is a signal for the human reviewer. It is not an
 automated verdict and does not replace Reviewing Engineer approval.
 
-Onewaydoor v1 intentionally does not include an adversarial-review subagent. If
+Buildwise v1 intentionally does not include an adversarial-review subagent. If
 v2 adds one, it must feed the human reviewer only. A subagent "pass" must never
 substitute for Reviewing Engineer sign-off.
 

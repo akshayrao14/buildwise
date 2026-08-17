@@ -1,19 +1,19 @@
-# Onewaydoor Import Review
+# Buildwise Import Review
 
-Use this template to create `onewaydoor-docs/import-review.md` in the target repo
-when importing onewaydoor into an existing mature repository. The actual import
-procedure is `onewaydoor-docs/onboarding/EXISTING-REPO-IMPORT.md`. Keep import
+Use this template to create `buildwise-docs/import-review.md` in the target repo
+when importing buildwise into an existing mature repository. The actual import
+procedure is `buildwise-docs/onboarding/EXISTING-REPO-IMPORT.md`. Keep import
 follow-ups here, not in the product `TODO.md` or active product backlog.
 
 ## Import summary
 
 - Target repo:
 - Base branch:
-- Onewaydoor source remote/branch:
+- Buildwise source remote/branch:
 - Import branch:
-- Import method: squash merge from onewaydoor, not manual file copy
-- Initial onewaydoor state:
-- Target onewaydoor state after review:
+- Import method: squash merge from buildwise, not manual file copy
+- Initial buildwise state:
+- Target buildwise state after review:
 - Date:
 - Reviewing Engineer:
 
@@ -39,9 +39,9 @@ and why.
 - Native CI/release checks:
 - Backlog/source-of-truth docs:
 
-## Accepted onewaydoor exceptions
+## Accepted buildwise exceptions
 
-Mirror these in `onewaydoor.config.yml` where possible.
+Mirror these in `buildwise.config.yml` where possible.
 
 - Deployment providers/domains/regions:
 - Auth provider:
@@ -52,20 +52,20 @@ Mirror these in `onewaydoor.config.yml` where possible.
 - Checks that start advisory or diff-scoped:
 - Generic project-check mode (`auto`, `advisory`, or `disabled`):
 
-## Onewaydoor-created Markdown audit
+## Buildwise-created Markdown audit
 
-- `PROJECT-CONTEXT.md` is active, has the correct onewaydoor state, and points to
+- `PROJECT-CONTEXT.md` is active, has the correct buildwise state, and points to
   the project source of truth.
 - `DESIGN.md` summarizes the existing project and points to authoritative docs.
 - `JOURNAL.md` contains a dated import entry.
 - `TODO.md` points to the real product backlog and does not contain import-only
   follow-ups.
-- Generic onewaydoor docs are intentionally generic.
+- Generic buildwise docs are intentionally generic.
 
 ## Checks and follow-ups
 
 - Required native CI:
-- Onewaydoor checks enabled:
-- Onewaydoor checks intentionally advisory or disabled:
+- Buildwise checks enabled:
+- Buildwise checks intentionally advisory or disabled:
 - Baseline review needed before making checks blocking:
 - Reviewing Engineer questions:

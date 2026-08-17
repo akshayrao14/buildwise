@@ -1,4 +1,4 @@
-name: Onewaydoor Merge Source Checks
+name: Buildwise Merge Source Checks
 
 on:
   pull_request:

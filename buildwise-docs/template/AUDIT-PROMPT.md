@@ -1,8 +1,8 @@
 # Instruction-Surface Audit Prompt
 
 A standing, reusable prompt for periodically auditing this repo's own
-instruction/governance surface — `AGENTS.md`/`CLAUDE.md`, `onewaydoor-docs/`,
-`.github/`, `onewaydoor.config.yml`, root steering files — for
+instruction/governance surface — `AGENTS.md`/`CLAUDE.md`, `buildwise-docs/`,
+`.github/`, `buildwise.config.yml`, root steering files — for
 inconsistencies, contradictions, stale claims, and drift.
 
 This is a template-maintenance tool, not a Citizen Developer flow. It
@@ -37,7 +37,7 @@ template-maintenance PRs (see `OPERATING-MODES.md` §3).
 ## The prompt
 
 ```
-You are auditing the instruction/governance surface of this repo (a onewaydoor
+You are auditing the instruction/governance surface of this repo (a buildwise
 template repo whose product IS its agent-instruction files, not app code) for
 inconsistencies, contradictions, stale claims, and drift. Output a ranked
 finding list for a human to brainstorm/prioritize with — do NOT edit

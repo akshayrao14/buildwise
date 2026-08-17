@@ -1,4 +1,4 @@
-name: Onewaydoor Project Checks
+name: Buildwise Project Checks
 
 on:
   pull_request:
@@ -19,7 +19,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Read onewaydoor project-check mode
+      - name: Read buildwise project-check mode
         id: mode
         shell: bash
         run: |
@@ -28,9 +28,9 @@ jobs:
           config_value() {
             local key="$1"
             local default="$2"
-            if [[ -f onewaydoor.config.yml ]]; then
+            if [[ -f buildwise.config.yml ]]; then
               local value
-              value="$(awk -F: -v key="$key" '$1 == key {print $2; exit}' onewaydoor.config.yml | sed 's/^ *//; s/ *$//' | tr -d '"')"
+              value="$(awk -F: -v key="$key" '$1 == key {print $2; exit}' buildwise.config.yml | sed 's/^ *//; s/ *$//' | tr -d '"')"
               if [[ -n "$value" ]]; then
                 echo "$value"
                 return
@@ -68,11 +68,11 @@ jobs:
           echo "build_check_mode=$build_check_mode" >> "$GITHUB_OUTPUT"
 
           {
-            echo "# Onewaydoor project-check mode"
+            echo "# Buildwise project-check mode"
             echo
             echo "- Project type: \`$project_type\`"
             echo "- Project checks mode: \`$project_checks_mode\`"
-            echo "- Build check mode: \`$build_check_mode\` (\`build\` is advisory by default; set \`build_check_mode: blocking\` in \`onewaydoor.config.yml\` to enforce it)"
+            echo "- Build check mode: \`$build_check_mode\` (\`build\` is advisory by default; set \`build_check_mode: blocking\` in \`buildwise.config.yml\` to enforce it)"
             echo
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -80,7 +80,7 @@ jobs:
         if: steps.mode.outputs.project_checks_mode == 'disabled'
         shell: bash
         run: |
-          echo "Onewaydoor generic project checks are disabled by onewaydoor.config.yml. Native repo CI should remain authoritative." >> "$GITHUB_STEP_SUMMARY"
+          echo "Buildwise generic project checks are disabled by buildwise.config.yml. Native repo CI should remain authoritative." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Detect Node project
         if: steps.mode.outputs.project_checks_mode != 'disabled'
@@ -125,7 +125,7 @@ jobs:
 
           if [[ "$PROJECT_CHECKS_MODE" == "advisory" ]]; then
             install_deps || {
-              echo "Onewaydoor dependency-install failure is advisory for this repo. Native CI should remain authoritative." >> "$GITHUB_STEP_SUMMARY"
+              echo "Buildwise dependency-install failure is advisory for this repo. Native CI should remain authoritative." >> "$GITHUB_STEP_SUMMARY"
               exit 0
             }
           else
@@ -186,7 +186,7 @@ jobs:
               continue
             fi
 
-            echo "::error::Onewaydoor project check failed: $script (${blocking_for[$script]})"
+            echo "::error::Buildwise project check failed: $script (${blocking_for[$script]})"
             scripts_failed+=("$script")
             if [[ "${blocking_for[$script]}" == "blocking" ]]; then
               blocking_failed+=("$script")
@@ -194,7 +194,7 @@ jobs:
           done
 
           {
-            echo "## Onewaydoor project check results"
+            echo "## Buildwise project check results"
             echo
             if [[ ${#scripts_found[@]} -eq 0 ]]; then
               echo "No lint/typecheck/test/build scripts found in package.json; nothing to run."
@@ -224,7 +224,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
           if [[ ${#blocking_failed[@]} -gt 0 ]]; then
-            echo "::error::Blocking onewaydoor project checks failed: ${blocking_failed[*]}"
+            echo "::error::Blocking buildwise project checks failed: ${blocking_failed[*]}"
             exit 1
           fi
 

@@ -1,19 +1,19 @@
 # Reviewing Engineer Quick Start
 
-onewaydoor is a template repo for Citizen Developers building projects with AI
+buildwise is a template repo for Citizen Developers building projects with AI
 coding agents. It gives each project a safe starting structure, agent steering
 instructions, an onboarding flow, self-contained GitHub Actions workflows,
 local pre-commit checks, and PR review prompts.
 
-Use this guide when creating a new onewaydoor project repo, handing it to a
-Citizen Developer, or bringing an existing project onto onewaydoor.
+Use this guide when creating a new buildwise project repo, handing it to a
+Citizen Developer, or bringing an existing project onto buildwise.
 
-Onewaydoor state is only for routing onewaydoor import/onboarding/resume
+Buildwise state is only for routing buildwise import/onboarding/resume
 behavior. It is separate from the product's own delivery stage, such as
 requirements, design, implementation, testing, pilot, or production.
 
 For review, import, and release work, use Reviewing Engineer mode from
-`onewaydoor-docs/governance/OPERATING-MODES.md`. In that mode, an agent may
+`buildwise-docs/governance/OPERATING-MODES.md`. In that mode, an agent may
 help inspect, summarize, and prepare review artifacts, but automated checks
 and agent recommendations do not replace human Reviewing Engineer approval.
 "Reviewing Engineer" is a self-fillable role — it can be the Citizen Developer
@@ -25,11 +25,11 @@ different human.
 
 ## Startup trigger
 
-The Reviewing Engineer starts a PR review by saying `Start Onewaydoor Review`,
+The Reviewing Engineer starts a PR review by saying `Start Buildwise Review`,
 or by sending a message that is only a GitHub PR URL
 (`https://github.com/<org>/<repo>/pull/<n>`, with at most trivial whitespace
-around it). Both work in any onewaydoor repo (template or generated project),
-the same way `Start Onewaydoor` works everywhere for Citizen Developers. A URL
+around it). Both work in any buildwise repo (template or generated project),
+the same way `Start Buildwise` works everywhere for Citizen Developers. A URL
 that is part of a larger message asking something else does not trigger
 review mode — only a message that is the URL counts as the bare-URL trigger.
 
@@ -38,9 +38,9 @@ When either form fires:
 1. If the phrase was used without a PR, ask which PR (number or URL) before
    continuing.
 2. Enter Reviewing Engineer mode
-   (`onewaydoor-docs/governance/OPERATING-MODES.md`) scoped to that PR only.
+   (`buildwise-docs/governance/OPERATING-MODES.md`) scoped to that PR only.
    For existing-repo imports, also read
-   `onewaydoor-docs/onboarding/EXISTING-REPO-IMPORT.md`.
+   `buildwise-docs/onboarding/EXISTING-REPO-IMPORT.md`.
 3. Fetch the PR with `gh pr view <url-or-number>`. This works regardless of
    which repo the agent's working directory is in, since the URL/number is
    explicit; if only a bare number was given, assume the current repo.
@@ -51,8 +51,8 @@ When either form fires:
      expectations" above).
    - Red Zone self-declaration vs. the actual diff: external-user login,
      domain-sensitive data, payments, and any project-specific Red Zone
-     categories recorded in `DESIGN.md`/`SECURITY.md`/`onewaydoor.config.yml`.
-   - Required-checks status: secret scan, SAST scan, onewaydoor policy scan,
+     categories recorded in `DESIGN.md`/`SECURITY.md`/`buildwise.config.yml`.
+   - Required-checks status: secret scan, SAST scan, buildwise policy scan,
      and project checks, whichever of these this project has actually wired
      up — surface pass/fail/pending, do not re-implement them.
    - Auth/deployment/production-domain/external-service flags per "When
@@ -76,7 +76,7 @@ When either form fires:
    The agent never selects the verdict itself; it only executes the verdict
    the engineer names. This keeps human merge authority intact — see
    `AGENTS.md` "What Happens If You Touch a Red Zone Item" and
-   `onewaydoor-docs/governance/governance-decisions.md` §9 item 2.
+   `buildwise-docs/governance/governance-decisions.md` §9 item 2.
 
 This trigger is a review the Reviewing Engineer can invoke on demand. It does
 not replace the Reviewing Engineer's own read of the PR, and it does not
@@ -86,7 +86,7 @@ change the required-human-approval gate on `main`.
 
 - Cross-agent steering through `AGENTS.md` plus tool-specific pointers for
   Claude, Gemini, Copilot, and Codex-like agents.
-- A startup phrase that tells agents to begin the onewaydoor onboarding flow.
+- A startup phrase that tells agents to begin the buildwise onboarding flow.
 - Stable project context files: `PROJECT-CONTEXT.md`, `DESIGN.md`, `JOURNAL.md`,
   `README.md`, and `TODO.md`.
 - Red Zone guidance for external login, payments, and project-specific
@@ -98,11 +98,11 @@ change the required-human-approval gate on `main`.
 
 ## New project repo setup
 
-1. Use the GitHub template flow to create the new repo from the `onewaydoor`
-   template (`akshayrao14/onewaydoor`, or wherever this project's copy lives)
+1. Use the GitHub template flow to create the new repo from the `buildwise`
+   template (`akshayrao14/buildwise`, or wherever this project's copy lives)
    in whatever GitHub org/account this project lives in.
 2. Include all branches.
-3. Name the repo `owd-<dev-name>-<project-name>` (or your own preference).
+3. Name the repo `bw-<dev-name>-<project-name>` (or your own preference).
 4. Confirm these branches exist:
    - `working` — default branch, everyday build branch; no PR required to
      push here;
@@ -140,7 +140,7 @@ For generated project repos, verify:
 - Supabase project created, connection string in environment variables.
 - Release/deployment CI/CD should start only from `main`, not from `working`.
 - `working` allows direct feature-branch merges.
-- Fresh onewaydoor feature/work branches are cut from `working` for
+- Fresh buildwise feature/work branches are cut from `working` for
   independent or risky work, then merged back into `working` when done. When
   `working` is in a good state, open a PR from `working` into `main` for
   release.
@@ -150,14 +150,14 @@ For generated project repos, verify:
 - Required checks depend on what this project has actually wired up in
   `.github/workflows/`; verify against live rulesets
   (`gh api repos/<org>/<repo>/rules/branches/<branch>`) rather than assuming
-  any specific check is required by default. onewaydoor does not ship a
-  fixed set of required checks — a secret scan, SAST scan, and onewaydoor
+  any specific check is required by default. buildwise does not ship a
+  fixed set of required checks — a secret scan, SAST scan, and buildwise
   policy scan become required only once this project's own repo settings
   enable them.
 - Template repo creation is not blocked by required checks during branch
   creation.
 - Reusable workflows, if used, live in this repo's own
-  `.github/workflows/` — onewaydoor does not maintain a separate
+  `.github/workflows/` — buildwise does not maintain a separate
   shared/reusable-workflows repo.
 - The PR template appears when opening a PR.
 
@@ -192,13 +192,13 @@ notes are written, and blocking review questions are resolved.
 Send this message:
 
 ```text
-Your onewaydoor project repo is ready.
+Your buildwise project repo is ready.
 
 1. Clone the repo.
 2. Open your coding agent in the repo folder.
 3. Paste this exact phrase into the agent:
 
-Start Onewaydoor
+Start Buildwise
 
 The agent will guide you through setup. It should ask only for the next detail it
 needs, save project context in the repo, and avoid Vercel/Supabase setup until
@@ -206,9 +206,9 @@ needed.
 
 Use the same primary phrase in CLI tools and app-based agents. If the app asks for
 permission to commit, push, or create a PR, approve only when the action matches
-the onewaydoor workflow the agent explains. If the app cannot read repo files,
+the buildwise workflow the agent explains. If the app cannot read repo files,
 attach or paste `AGENTS.md`, `PROJECT-CONTEXT.md` if present, and
-`onewaydoor-docs/onboarding/ONBOARDING.md`.
+`buildwise-docs/onboarding/ONBOARDING.md`.
 ```
 
 When handing off, also set this expectation: the agent should stay focused on the
@@ -264,28 +264,28 @@ start. The agent should:
 
 For existing projects, do not overwrite files blindly.
 
-- Use `onewaydoor-docs/onboarding/EXISTING-REPO-IMPORT.md` as the repeatable
+- Use `buildwise-docs/onboarding/EXISTING-REPO-IMPORT.md` as the repeatable
   runbook for mature existing repos.
-- If the project has no git/GitHub repo: create a new onewaydoor repo, clone it
+- If the project has no git/GitHub repo: create a new buildwise repo, clone it
   into a separate folder, then copy/move existing project files into that clone
   intentionally.
-- If the project already has a GitHub repo: import onewaydoor files carefully;
-  prefer a squash merge from onewaydoor `working`, then inspect and resolve
+- If the project already has a GitHub repo: import buildwise files carefully;
+  prefer a squash merge from buildwise `working`, then inspect and resolve
   conflicts one by one.
 - Preserve existing `README.md`, `TODO.md`, `AGENTS.md`, `.gitignore`, and other
   steering/config files unless whoever fills the Reviewing Engineer role for
   this project approves a specific replacement.
-- Treat Vercel, Supabase, and the onewaydoor branch model as defaults for fresh
-  onewaydoor projects, not mandatory replacements for an existing project's
+- Treat Vercel, Supabase, and the buildwise branch model as defaults for fresh
+  buildwise projects, not mandatory replacements for an existing project's
   deployment, auth, or branch model.
 - During import, identify the project's domain-sensitive data categories, such as
   candidate/recruiter, healthcare/patient, employee/payroll, financial,
   customer, or other regulated operational data, and record them as
   project-specific Red Zone categories.
-- Set `project_type: existing-import` in `onewaydoor.config.yml` for mature repos
+- Set `project_type: existing-import` in `buildwise.config.yml` for mature repos
   that already have their own branch, deployment, auth, workflow, domain, or
   secrets model.
-- Record accepted differences in `onewaydoor.config.yml`, for example approved
+- Record accepted differences in `buildwise.config.yml`, for example approved
   deployment providers, auth provider, branch model, archived paths, and
   whether policy checks should start as advisory.
 - Do not put active source-of-truth files in `archived_paths`. If a file is
@@ -293,23 +293,23 @@ For existing projects, do not overwrite files blindly.
   it as active or secondary truth. Archive exclusions reduce check noise during
   import, but they are not a way to hide active governance or product docs from
   review.
-- Do not make onewaydoor checks required for the existing repo until the import
+- Do not make buildwise checks required for the existing repo until the import
   baseline has been reviewed. Keep existing required CI in place, then promote
-  selected onewaydoor checks to required after baseline noise is handled. If the
+  selected buildwise checks to required after baseline noise is handled. If the
   existing repo already has stricter native CI, keep that CI authoritative and
   set `project_checks_mode: advisory` or `project_checks_mode: disabled` in
-  `onewaydoor.config.yml` instead of requiring generic onewaydoor project checks
+  `buildwise.config.yml` instead of requiring generic buildwise project checks
   that duplicate or conflict with it.
-- Keep onewaydoor-import follow-ups in a onewaydoor-owned note such as
-  `onewaydoor-docs/import-review.md`, not in the product backlog.
+- Keep buildwise-import follow-ups in a buildwise-owned note such as
+  `buildwise-docs/import-review.md`, not in the product backlog.
 
-Before approving an existing-project onewaydoor import, confirm:
+Before approving an existing-project buildwise import, confirm:
 
 - existing deployment, auth, branch, security, and backlog conventions were
   preserved or changed only with explicit approval from whoever fills the
   Reviewing Engineer role for this project;
-- `onewaydoor.config.yml` accurately records accepted differences from fresh
-  onewaydoor defaults, including providers, branch model, sensitive-data
+- `buildwise.config.yml` accurately records accepted differences from fresh
+  buildwise defaults, including providers, branch model, sensitive-data
   categories, archived paths, advisory/strict check mode, and whether generic
   project checks are `auto`, `advisory`, or `disabled`; if project checks are
   enabled, confirm whether `build` should stay advisory or become blocking via
@@ -319,15 +319,15 @@ Before approving an existing-project onewaydoor import, confirm:
   secret/config location, and approval status;
 - `PROJECT-CONTEXT.md`, `DESIGN.md`, `JOURNAL.md`, and `TODO.md` are pointer
   docs for the existing project, not competing sources of truth;
-- `PROJECT-CONTEXT.md` uses the right onewaydoor state: usually
-  `owd-needs-review-before-resume` until import review is complete, then
-  `owd-ready-to-resume`;
-- onewaydoor-created Markdown files have been audited so placeholders are
+- `PROJECT-CONTEXT.md` uses the right buildwise state: usually
+  `bw-needs-review-before-resume` until import review is complete, then
+  `bw-ready-to-resume`;
+- buildwise-created Markdown files have been audited so placeholders are
   either populated with project-specific knowledge or explicitly left generic
   by design;
 - any existing PR template keeps the project-specific quality checklist while
-  adding onewaydoor Red Zone and deployment-impact prompts;
-- onewaydoor workflows trigger on the existing repo's real protected/integration
+  adding buildwise Red Zone and deployment-impact prompts;
+- buildwise workflows trigger on the existing repo's real protected/integration
   branches, not blindly on `working` / `main`;
 - third-party preview/deploy checks that fail on the import PR are understood as
   either irrelevant for docs-only import, expected provider behavior, or real
@@ -338,7 +338,7 @@ Before approving an existing-project onewaydoor import, confirm:
 The agent should:
 
 - read `AGENTS.md`, `PROJECT-CONTEXT.md`, and
-  `onewaydoor-docs/onboarding/ONBOARDING.md`;
+  `buildwise-docs/onboarding/ONBOARDING.md`;
 - infer obvious facts from the repo name and opening user message;
 - ask staged onboarding questions one at a time;
 - activate `PROJECT-CONTEXT.md` and seed `DESIGN.md` / `JOURNAL.md`;
@@ -364,4 +364,4 @@ Step back in when:
   provider;
 - the work touches a Red Zone category;
 - the project is ready to promote beyond prototype/demo use — see
-  `onewaydoor-docs/governance/PRODUCTION-PROMOTION.md` for the checklist.
+  `buildwise-docs/governance/PRODUCTION-PROMOTION.md` for the checklist.

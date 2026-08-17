@@ -1,6 +1,6 @@
 # Production Promotion Checklist (v1)
 
-Defines what "going to production" means for a onewaydoor project repo and
+Defines what "going to production" means for a buildwise project repo and
 what a `working` → `main` promotion requires. Before this doc existed,
 `AGENTS.md` and `ONBOARDING.md` referenced "production" and "promotion review"
 without defining either.
@@ -15,13 +15,13 @@ PR and still not be ready for production promotion.
    `main`.
 2. **Review from whoever fills the Reviewing Engineer role**, enforced by
    repo settings if you've set up branch protection for this project (see
-   `onewaydoor-docs/template/RELEASE-CHECKLIST.md`); if no one fills the
+   `buildwise-docs/template/RELEASE-CHECKLIST.md`); if no one fills the
    role, this is a self-review checkpoint, not a skip.
 3. **Domain review.** If the project needs a production domain, whoever fills
    the Reviewing Engineer role confirms it is set up (through Vercel or your
    DNS provider).
 4. **Deploy path review.** Confirm a real deployment workflow actually
-   triggers from `main` for this project. The onewaydoor template does not
+   triggers from `main` for this project. The buildwise template does not
    ship one by default — `main` "triggers production deployments" only once
    the project has wired that up itself.
 5. **Data review.** Confirm production data handling matches
@@ -38,7 +38,7 @@ PR and still not be ready for production promotion.
 There is no dedicated "publish to prod" role — whoever fills the Reviewing
 Engineer role runs this checklist; for a solo citizen dev, that's a
 deliberate self-check before promoting. See
-`onewaydoor-docs/governance/governance-decisions.md`.
+`buildwise-docs/governance/governance-decisions.md`.
 
 ## What this does not do
 

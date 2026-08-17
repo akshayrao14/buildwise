@@ -1,6 +1,6 @@
 # Project Context
 
 Status: template-not-initialized
-Onewaydoor state: owd-ready-to-start
+Buildwise state: bw-ready-to-start
 
-See `onewaydoor-docs/onboarding/ONBOARDING.md` for startup routing.
+See `buildwise-docs/onboarding/ONBOARDING.md` for startup routing.

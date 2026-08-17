@@ -1,6 +1,6 @@
-# Onewaydoor Docs
+# Buildwise Docs
 
-Onewaydoor-owned documentation lives here so generated project repos can use
+Buildwise-owned documentation lives here so generated project repos can use
 ordinary project names such as `README.md`, `TODO.md`, and `docs/` without
 mixing project notes with template/process notes.
 
@@ -8,17 +8,17 @@ mixing project notes with template/process notes.
 
 - `onboarding/` — Citizen Developer and Reviewing Engineer handoff guidance,
   including the existing-repo import runbook.
-- `governance/` — onewaydoor governance decisions, operating modes, and
+- `governance/` — buildwise governance decisions, operating modes, and
   agent-judgment rationale.
-- `template/` — onewaydoor template release checklist, import review
+- `template/` — buildwise template release checklist, import review
   template, and the periodic instruction-surface audit prompt
   (`template/AUDIT-PROMPT.md`).
 
 ## Reviewing Engineer quick start
 
-1. Use `onewaydoor` as the GitHub template repo.
+1. Use `buildwise` as the GitHub template repo.
 2. Create the new repo (your own org/account, or a fork).
-3. Name it `owd-<dev-name>-<project-name>` (or your own convention).
+3. Name it `bw-<dev-name>-<project-name>` (or your own convention).
 4. Include all template branches.
 5. Apply project repo settings after creation; GitHub template creation does
    not reliably copy branch protection or repository settings.
